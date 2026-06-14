@@ -38,23 +38,6 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "barbers_beer_company",
-        "name": "Barbers & Beer Company",
-        "address": "Neljäs linja 17-19,  Helsinki, Finland",
-        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1842327,24.9480983",
-        "amenity": "bar"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.9480983,
-          60.1842327
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "id": "brooke",
         "name": "Brooke",
         "address": "Fleminginkatu 13,  Helsinki, Finland",
@@ -627,6 +610,57 @@
         "coordinates": [
           24.9613184,
           60.187448
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bar_molotow",
+        "name": "Bar Molotow",
+        "address": "Vaasankatu 29, 00500 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1884879,24.9534615",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9534615,
+          60.1884879
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "aleksis_k",
+        "name": "Aleksis K",
+        "address": "Aleksis Kiven katu 14, 00510 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1891818,24.9574519",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9574519,
+          60.1891818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "b12",
+        "name": "B12",
+        "address": "Vaasankatu 12, 00500 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1882177,24.9566059",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9566059,
+          60.1882177
         ]
       }
     }

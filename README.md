@@ -43,7 +43,7 @@ terrace per datetime) is stored in a small parquet table the app reads at
 runtime, so the UI stays fast.
 
 The current sun/shade table covers **2026**, sampled **biweekly** across the
-year at **hourly** times from **08:00 to 23:00**, for **37 terraces**.
+year at **hourly** times from **08:00 to 23:00**, for **39 terraces**.
 
 ## Quick start
 
@@ -72,7 +72,7 @@ src/
   core/           Shared logic — sun position, mesh loading, ray casting, terraces
   preprocessing/  Offline pipeline — download, parse CityGML, compute shadows
 data/
-  terraces.geojson            37 terrace locations + metadata
+  terraces.geojson            39 terrace locations + metadata
   terrace_polygons.geojson    permit terrace polygons matched to bars
   processed/buildings.parquet building footprints + heights
   shadows/terrace_shadows.parquet  precomputed sun/shade table

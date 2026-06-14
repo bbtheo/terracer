@@ -30,7 +30,7 @@ def _data():
 def test_loaders_return_expected_shapes():
     D = _data()
     terraces = D.load_terraces()
-    assert len(terraces) == 37
+    assert len(terraces) == 39
     assert {"id", "name", "amenity", "lon", "lat"}.issubset(terraces.columns)
 
     shadows = D.load_shadows()
@@ -68,14 +68,14 @@ def test_snap_date_off_grid_and_exact():
     assert was2 is False
 
 
-def test_snapshot_for_returns_37_rows():
+def test_snapshot_for_returns_all_terraces():
     D = _data()
     terraces = D.load_terraces()
     shadows = D.load_shadows()
     sample = date(2026, 6, 18)  # a real 2026 summer sample date
     dt = D.make_datetime(sample, 14)
     snap = D.snapshot_for(shadows, terraces, dt)
-    assert len(snap) == 37
+    assert len(snap) == len(terraces) == 39
     assert {"in_sun", "sun_fraction", "pct", "color"}.issubset(snap.columns)
     assert snap["in_sun"].dtype == bool
     assert snap["sun_fraction"].between(0.0, 1.0).all()
@@ -99,7 +99,7 @@ def test_rank_orders_by_fraction_desc():
     shadows = D.load_shadows()
     dt = D.make_datetime(date(2026, 6, 18), 14)
     ranked = D.rank(D.snapshot_for(shadows, terraces, dt))
-    assert ranked["Rank"].tolist() == list(range(1, 38))
+    assert ranked["Rank"].tolist() == list(range(1, len(terraces) + 1))
     fracs = ranked["sun_fraction"].tolist()
     assert fracs == sorted(fracs, reverse=True)
 
