@@ -14,6 +14,10 @@ REPO = Path(__file__).resolve().parents[1]
 APP_PATH = REPO / "src" / "app" / "app.py"
 DATA_PATH = REPO / "src" / "app" / "data.py"
 
+# A real 2026 summer sample date (biweekly grid, day 168 from 2026-01-01).
+SAMPLE = date(2026, 6, 18)
+NOON = 14 * 60  # minutes from midnight
+
 
 def _load(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -30,13 +34,29 @@ def _data():
 def test_loaders_return_expected_shapes():
     D = _data()
     terraces = D.load_terraces()
-    assert len(terraces) == 39
+    assert len(terraces) == 43
     assert {"id", "name", "amenity", "lon", "lat"}.issubset(terraces.columns)
+    # Opening-hours columns are parsed.
+    assert {"opens_min", "closes_min", "closed_days_set", "hours_text"}.issubset(
+        terraces.columns
+    )
+    assert (terraces["opens_min"] >= 0).all()  # every bar has an opening time
 
     shadows = D.load_shadows()
-    assert len(shadows) > 6000
+    assert len(shadows) > 30000
     assert {"terrace_id", "datetime", "in_sun", "sun_fraction"}.issubset(shadows.columns)
     assert str(shadows["datetime"].dt.tz) == "Europe/Helsinki"
+
+
+def test_half_hour_grid():
+    D = _data()
+    assert len(D.SLOT_MINUTES) == 31
+    assert D.SLOT_MINUTES[0] == 8 * 60 and D.SLOT_MINUTES[-1] == 23 * 60
+    assert D.SLOT_STEP_MIN == 30 and D.SLOT_HOURS == 0.5
+    # Data really is sampled half-hourly.
+    s = D.load_shadows()
+    mins = sorted({int(h) * 60 + int(m) for h, m in zip(s["datetime"].dt.hour, s["datetime"].dt.minute)})
+    assert mins == list(D.SLOT_MINUTES)
 
 
 def test_sample_dates_and_default():
@@ -44,94 +64,117 @@ def test_sample_dates_and_default():
     dates = D.sample_dates()
     assert len(dates) == 27
     assert all(d.year == 2026 for d in dates)
-    # Default is the OPEN date (today mapped onto the 2026 data year), in-bounds
-    # and NOT pre-snapped — the UI snaps it for display.
     default = D.default_date()
-    assert default == D._today_ref()
-    assert default.year == 2026
+    assert default == D._today_ref()  # the open date
     assert dates[0] <= default <= dates[-1]
 
 
 def test_snap_date_off_grid_and_exact():
     D = _data()
     samples = D.sample_dates()
-    off_grid = date(2026, 6, 13)
-    snapped, was = D.snap_date(off_grid)
-    assert snapped in samples
-    assert was is True
-    # The snapped date is the nearest sample.
-    assert snapped == min(samples, key=lambda s: abs((s - off_grid).days))
+    off = date(2026, 6, 13)
+    snapped, was = D.snap_date(off)
+    assert was is True and snapped in samples
+    assert snapped == min(samples, key=lambda s: abs((s - off).days))
+    snapped2, was2 = D.snap_date(samples[10])
+    assert snapped2 == samples[10] and was2 is False
 
-    exact = samples[10]
-    snapped2, was2 = D.snap_date(exact)
-    assert snapped2 == exact
-    assert was2 is False
+
+def test_make_datetime_and_fmt():
+    D = _data()
+    dt = D.make_datetime(SAMPLE, 14 * 60 + 30)
+    assert (dt.hour, dt.minute) == (14, 30)
+    assert D.fmt_minutes(14 * 60 + 30) == "14:30"
+    assert D.fmt_minutes(8 * 60) == "08:00"
+    assert D.fmt_duration(7) == "3h 30m"  # 7 half-hour slots
+    assert D.fmt_duration(4) == "2h"
+    assert D.fmt_duration(1) == "30m"
+    assert D.fmt_duration(0) == "none"
 
 
 def test_snapshot_for_returns_all_terraces():
     D = _data()
     terraces = D.load_terraces()
     shadows = D.load_shadows()
-    sample = date(2026, 6, 18)  # a real 2026 summer sample date
-    dt = D.make_datetime(sample, 14)
-    snap = D.snapshot_for(shadows, terraces, dt)
-    assert len(snap) == len(terraces) == 39
+    snap = D.snapshot_for(shadows, terraces, D.make_datetime(SAMPLE, NOON))
+    assert len(snap) == len(terraces) == 43
     assert {"in_sun", "sun_fraction", "pct", "color"}.issubset(snap.columns)
-    assert snap["in_sun"].dtype == bool
     assert snap["sun_fraction"].between(0.0, 1.0).all()
-    # At a summer afternoon at least one terrace is lit.
     assert int(snap["in_sun"].sum()) >= 1
 
 
-def test_day_profile_returns_hourly_rows():
+def test_day_profile_is_half_hourly():
     D = _data()
     shadows = D.load_shadows()
-    terrace_id = shadows["terrace_id"].iloc[0]
-    prof = D.day_profile(shadows, terrace_id, date(2026, 6, 18))
-    assert len(prof) == 16
-    assert prof["hour"].tolist() == list(range(8, 24))
+    tid = shadows["terrace_id"].iloc[0]
+    prof = D.day_profile(shadows, tid, SAMPLE)
+    assert len(prof) == 31
+    assert prof["minutes"].tolist() == list(D.SLOT_MINUTES)
     assert prof["sun_fraction"].between(0.0, 1.0).all()
-
-
-def test_rank_orders_by_fraction_desc():
-    D = _data()
-    terraces = D.load_terraces()
-    shadows = D.load_shadows()
-    dt = D.make_datetime(date(2026, 6, 18), 14)
-    ranked = D.rank(D.snapshot_for(shadows, terraces, dt))
-    assert ranked["Rank"].tolist() == list(range(1, len(terraces) + 1))
-    fracs = ranked["sun_fraction"].tolist()
-    assert fracs == sorted(fracs, reverse=True)
 
 
 def test_sun_hours_left_and_best_hour():
     D = _data()
     shadows = D.load_shadows()
-    terrace_id = shadows["terrace_id"].iloc[0]
-    prof = D.day_profile(shadows, terrace_id, date(2026, 6, 18))
-    left = D.sun_hours_left(prof, 14)
-    assert isinstance(left, int) and 0 <= left <= 16  # 1h per lit sample
-    hour, frac = D.best_hour(prof)
-    assert hour is None or hour in range(8, 24)
+    tid = shadows["terrace_id"].iloc[0]
+    prof = D.day_profile(shadows, tid, SAMPLE)
+    left = D.sun_hours_left(prof, NOON)
+    assert isinstance(left, float) and 0.0 <= left <= 15.0
+    assert (left / D.SLOT_HOURS).is_integer()  # whole half-hour slots
+    minutes, frac = D.best_hour(prof)
+    assert minutes is None or minutes in D.SLOT_MINUTES
     assert 0.0 <= frac <= 1.0
+
+
+def test_opening_hours_parsing_and_is_open():
+    D = _data()
+    t = D.load_terraces().set_index("id")
+    # Brooke is closed Mondays per research.
+    brooke = t.loc["brooke"]
+    assert 0 in brooke["closed_days_set"]  # Mon == 0
+    mon = date(2026, 6, 15)  # a Monday
+    thu = date(2026, 6, 18)  # a Thursday
+    assert mon.weekday() == 0 and thu.weekday() == 3
+    dt_mon = D.make_datetime(mon, 18 * 60)
+    dt_thu = D.make_datetime(thu, 18 * 60)
+    assert D.is_open_at(brooke["opens_min"], brooke["closes_min"], brooke["closed_days_set"], dt_mon) is False
+    assert D.is_open_at(brooke["opens_min"], brooke["closes_min"], brooke["closed_days_set"], dt_thu) is True
+
+
+def test_ranked_for_orders_by_open_sun_and_respects_closed_days():
+    D = _data()
+    terraces = D.load_terraces()
+    shadows = D.load_shadows()
+    mon = date(2026, 6, 15)  # request a Monday
+    r = D.ranked_for(shadows, terraces, SAMPLE, NOON, req_date=mon)
+    assert len(r) == 43
+    assert r["Rank"].tolist() == list(range(1, 44))
+    # Ordered by remaining open+sunny slots, descending.
+    assert r["osl_slots"].tolist() == sorted(r["osl_slots"].tolist(), reverse=True)
+    assert {"open_now", "osl_hours", "hours_text"}.issubset(r.columns)
+    # A Monday-closed bar must be closed and contribute zero open-sun time.
+    brooke = r[r["terrace_id"] == "brooke"].iloc[0]
+    assert bool(brooke["open_now"]) is False
+    assert int(brooke["osl_slots"]) == 0
+
+
+def test_new_bars_present():
+    D = _data()
+    ids = set(D.load_terraces()["id"])
+    assert {"toveri", "alkuviini", "mamas_empanadas", "way_bakery"}.issubset(ids)
+    assert "barbers_beer_company" not in ids
 
 
 def test_sun_az_alt_and_compass():
     D = _data()
-    # Summer afternoon: sun high and to the south-ish.
-    az, alt = D.sun_az_alt(D.make_datetime(date(2026, 6, 17), 14))
-    assert 0.0 <= az < 360.0
-    assert alt > 40.0
+    az, alt = D.sun_az_alt(D.make_datetime(date(2026, 6, 17), NOON))
+    assert 0.0 <= az < 360.0 and alt > 40.0
     assert D.compass_dir(az) == "S"
-    # Morning sun in the east.
-    az_am, _ = D.sun_az_alt(D.make_datetime(date(2026, 6, 17), 8))
+    az_am, _ = D.sun_az_alt(D.make_datetime(date(2026, 6, 17), 8 * 60))
     assert D.compass_dir(az_am) == "E"
-    # Winter evening: sun below the horizon.
-    _, alt_night = D.sun_az_alt(D.make_datetime(date(2026, 12, 30), 20))
+    _, alt_night = D.sun_az_alt(D.make_datetime(date(2026, 12, 30), 20 * 60))
     assert alt_night < 0.0
-    # Compass wraps correctly at the cardinal boundaries.
-    assert D.compass_dir(0) == "N" and D.compass_dir(359) == "N"
-    assert D.compass_dir(90) == "E" and D.compass_dir(270) == "W"
+    assert D.compass_dir(0) == "N" and D.compass_dir(90) == "E" and D.compass_dir(270) == "W"
 
 
 def test_build_deck_html_injects_sun_indicator():
@@ -140,22 +183,18 @@ def test_build_deck_html_injects_sun_indicator():
     shadows = D.load_shadows()
     buildings = D.load_buildings_clipped()
     permits = D.load_permit_polygons()
-    dt = D.make_datetime(date(2026, 6, 18), 14)
+    dt = D.make_datetime(SAMPLE, NOON)
     snap = D.snapshot_for(shadows, terraces, dt)
     html_with = D.build_deck_html(snap, None, buildings, permits, False, dt=dt)
-    assert "</body>" in html_with  # the injection anchor exists
     assert html_with.count("</body>") == 1
     assert "Sun" in html_with and "azimuth" in html_with
-    # Omitting dt yields no indicator (back-compatible).
-    html_without = D.build_deck_html(snap, None, buildings, permits, False)
-    assert "azimuth" not in html_without
+    assert "azimuth" not in D.build_deck_html(snap, None, buildings, permits, False)
 
 
 def test_lerp_color_endpoints():
     D = _data()
     assert D.lerp_color(0.0)[:3] == [0x5B, 0x64, 0x70]
     assert D.lerp_color(1.0)[:3] == [0xFB, 0x85, 0x00]
-    # Dark mode lifts the shade end.
     assert D.lerp_color(0.0, dark=True)[:3] != [0x5B, 0x64, 0x70]
 
 

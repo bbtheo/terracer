@@ -8,7 +8,11 @@
         "name": "Bar Lab",
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1856073,24.9463414",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 09–02",
+        "opens_min": 540,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -25,7 +29,11 @@
         "name": "Bar Loosister",
         "address": "Hämeentie 50, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1870486,24.9611381",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Sun–Tue 15–23, Wed–Thu 15–01, Fri–Sat 15–03:30",
+        "opens_min": 900,
+        "closes_min": 1380
       },
       "geometry": {
         "type": "Point",
@@ -42,7 +50,11 @@
         "name": "Brooke",
         "address": "Fleminginkatu 13,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1860976,24.9534724",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Mon",
+        "hours_text": "Tue–Thu & Sun 17–01, Fri–Sat 17–03, Mon closed",
+        "opens_min": 1020,
+        "closes_min": 60
       },
       "geometry": {
         "type": "Point",
@@ -59,7 +71,11 @@
         "name": "Cafe del Mar",
         "address": "Viides linja 16, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1838739,24.951349",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 10:30–03",
+        "opens_min": 630,
+        "closes_min": 180
       },
       "geometry": {
         "type": "Point",
@@ -76,7 +92,11 @@
         "name": "Cafe II-linja 23",
         "address": "Toinen linja 23, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830793,24.9450873",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Approx daily ~15–24 (Foursquare popular times; no official posted hours)",
+        "opens_min": 900,
+        "closes_min": 0
       },
       "geometry": {
         "type": "Point",
@@ -93,7 +113,11 @@
         "name": "Café Talo",
         "address": "Hämeentie 2 B, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1803394,24.9506971",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Mon 11–24, Tue–Fri 11–02, Sat 12–02, Sun 11–16 (a street bar / theater restaurant)",
+        "opens_min": 660,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -110,7 +134,11 @@
         "name": "Efes",
         "address": "Helsinginkatu 2a,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1874796,24.961081",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 15–02",
+        "opens_min": 900,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -127,7 +155,11 @@
         "name": "Femma IV",
         "address": "Viides linja 4,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826029,24.9545637",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Thu 15–02, Fri 14–02, Sat–Sun 09–02",
+        "opens_min": 540,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -144,7 +176,11 @@
         "name": "Flow Bar",
         "address": "Castréninkatu 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.184793,24.9466581",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "Sun,Mon",
+        "hours_text": "Tue–Thu 17–23, Fri–Sat 17–01:30, Sun–Mon closed",
+        "opens_min": 1020,
+        "closes_min": 90
       },
       "geometry": {
         "type": "Point",
@@ -161,7 +197,11 @@
         "name": "Flying Dutch",
         "address": "Pitkänsillanranta 2,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1766085,24.9492464",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Fri 11/12–24, Sat 12–24, Sun 12–22 (restaurant boat)",
+        "opens_min": 660,
+        "closes_min": 0
       },
       "geometry": {
         "type": "Point",
@@ -178,7 +218,11 @@
         "name": "Helsing Bar",
         "address": "Kaarlenkatu 3-5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1848357,24.9517632",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Daily 15–02 (Fri–Sat later, to ~04)",
+        "opens_min": 900,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -195,7 +239,11 @@
         "name": "Hendricks Pub Kallio",
         "address": "Fleminginkatu 6, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849923,24.9527763",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Sun–Thu 15–02, Fri–Sat 15–05",
+        "opens_min": 900,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -212,7 +260,11 @@
         "name": "HogoHuone",
         "address": "Viides linja 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830292,24.9543267",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "Mon",
+        "hours_text": "Tue–Thu 17–24, Fri–Sat 17–02, Sun 17–23, Mon closed",
+        "opens_min": 1020,
+        "closes_min": 1440
       },
       "geometry": {
         "type": "Point",
@@ -229,7 +281,11 @@
         "name": "Juttutupa",
         "address": "Säästöpankinranta 6, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.178912,24.9472739",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Thu 10:30–23, Fri 10:30–01, Sat 12–01, Sun 14–21",
+        "opens_min": 630,
+        "closes_min": 1380
       },
       "geometry": {
         "type": "Point",
@@ -246,7 +302,11 @@
         "name": "Kallio Bar",
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1812246,24.9531387",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Mon–Fri 14–02, Sat–Sun 10–02",
+        "opens_min": 840,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -263,7 +323,11 @@
         "name": "Kallio Snadi Pub",
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1815265,24.9511895",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Fri 15–02, Sat–Sun 12–02",
+        "opens_min": 720,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -280,7 +344,11 @@
         "name": "Kuikka",
         "address": "Helsinginkatu 32, 00510 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862898,24.9465943",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon & Sun 16–24, Tue–Fri 16–02, Sat 14–02",
+        "opens_min": 960,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -297,7 +365,11 @@
         "name": "Las Vegas",
         "address": "Viides linja 8,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830343,24.9535006",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 11–02",
+        "opens_min": 660,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -314,7 +386,11 @@
         "name": "Majava Baari",
         "address": "Porthaninkatu 9, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1828064,24.95277",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 12–02",
+        "opens_min": 720,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -331,7 +407,11 @@
         "name": "Mascot Bar & Live Stage",
         "address": "Neljäs linja 2, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1816369,24.9539999",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "Sun",
+        "hours_text": "Mon–Tue 17–02, Wed–Sat 17–05, Sun closed",
+        "opens_min": 1020,
+        "closes_min": 300
       },
       "geometry": {
         "type": "Point",
@@ -348,7 +428,11 @@
         "name": "Musta Kissa",
         "address": "Toinen linja 15, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1823697,24.9468228",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Mon",
+        "hours_text": "Tue & Sun 17–24, Wed–Sat 17–02, Mon closed",
+        "opens_min": 1020,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -365,7 +449,11 @@
         "name": "Oiva",
         "address": "Porthaninkatu 5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1818092,24.9512706",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Thu 10:30–16/23, Fri 10:30–02, Sat 10–02, Sun 10–17 (bar to 02 weekends)",
+        "opens_min": 600,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -382,7 +470,11 @@
         "name": "Oluthuone Haka",
         "address": "Toinen linja 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1814269,24.9492686",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Mon–Tue 14–01, Wed–Thu 14–02, Fri–Sat 12–02, Sun 14–24",
+        "opens_min": 720,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -399,7 +491,11 @@
         "name": "Om'pu",
         "address": "Siltasaarenkatu 15, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826161,24.9497277",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily from 09:00, closes ~02:00 (Sun earlier ~24:00)",
+        "opens_min": 540,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -416,7 +512,11 @@
         "name": "Pressapari",
         "address": "Wallininkatu 10,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849601,24.9431072",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 10–02",
+        "opens_min": 600,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -433,7 +533,11 @@
         "name": "Pub Porthan",
         "address": "Porthaninkatu 10, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1831699,24.952773",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Sun,Mon",
+        "hours_text": "Tue–Sat 17–02, Sun–Mon closed",
+        "opens_min": 1020,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -450,7 +554,11 @@
         "name": "Roskapankki",
         "address": "Helsinginkatu 20, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1867726,24.9517696",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Sun–Thu 10–24, Fri–Sat 10–02",
+        "opens_min": 600,
+        "closes_min": 1440
       },
       "geometry": {
         "type": "Point",
@@ -467,7 +575,11 @@
         "name": "Ruuhka",
         "address": "Hämeentie 30,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1836906,24.9585671",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Daily 15–02",
+        "opens_min": 900,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -484,7 +596,11 @@
         "name": "Rytmi",
         "address": "Toinen linja 2, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1808412,24.9500102",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "Sun",
+        "hours_text": "Mon–Sat 11–02, Sun closed",
+        "opens_min": 660,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -501,7 +617,11 @@
         "name": "Saloon Arizona",
         "address": "Castréninkatu 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849314,24.9468794",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 09–02",
+        "opens_min": 540,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -518,7 +638,11 @@
         "name": "Sirdie",
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1834848,24.9468123",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Mon,Tue,Wed,Thu,Sun",
+        "hours_text": "Fri–Sat 16–02; closed Mon–Thu & Sun",
+        "opens_min": 960,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -535,7 +659,11 @@
         "name": "Sivukirjasto",
         "address": "Fleminginkatu 5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1843808,24.9533486",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 12–02",
+        "opens_min": 720,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -552,7 +680,11 @@
         "name": "Street Bar",
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1811619,24.9529671",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Sun–Thu 12–04:30, Fri–Sat 12–05",
+        "opens_min": 720,
+        "closes_min": 270
       },
       "geometry": {
         "type": "Point",
@@ -569,7 +701,11 @@
         "name": "Struts",
         "address": "Fleminginkatu 13, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862837,24.9534519",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Mon,Sun",
+        "hours_text": "Tue–Thu 18–01, Fri–Sat 17–02; closed Mon & Sun",
+        "opens_min": 1020,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -586,7 +722,11 @@
         "name": "Virkavapaa",
         "address": "Kaarlenkatu 10,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1861223,24.9512452",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily 16–04:30",
+        "opens_min": 960,
+        "closes_min": 270
       },
       "geometry": {
         "type": "Point",
@@ -603,7 +743,11 @@
         "name": "William K. Kurvi",
         "address": "Helsinginkatu 2a,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.187448,24.9613184",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "Mon,Sun",
+        "hours_text": "Tue–Thu 16–24, Fri–Sat 16–02, Mon & Sun closed (note: closed for summer season)",
+        "opens_min": 960,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -620,7 +764,11 @@
         "name": "Bar Molotow",
         "address": "Vaasankatu 29, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1884879,24.9534615",
-        "amenity": "bar"
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Mon–Thu & Sun 16–02, Fri–Sat 14–03",
+        "opens_min": 960,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -637,7 +785,11 @@
         "name": "Aleksis K",
         "address": "Aleksis Kiven katu 14, 00510 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1891818,24.9574519",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "Mon,Tue,Sun",
+        "hours_text": "Wed–Sat 16–02, Mon–Tue & Sun closed",
+        "opens_min": 960,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
@@ -654,13 +806,101 @@
         "name": "B12",
         "address": "Vaasankatu 12, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1882177,24.9566059",
-        "amenity": "pub"
+        "amenity": "pub",
+        "closed_days": "",
+        "hours_text": "Daily ~09–02 (early-opening Kallio dive bar)",
+        "opens_min": 540,
+        "closes_min": 120
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
           24.9566059,
           60.1882177
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "toveri",
+        "name": "Toveri",
+        "address": "Castréninkatu 3, 00530 Helsinki",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1840577,24.9454935",
+        "amenity": "bar",
+        "closed_days": "Mon,Sun",
+        "hours_text": "Tue–Thu 18–24, Fri–Sat 18–02, Mon & Sun closed",
+        "opens_min": 1080,
+        "closes_min": 120
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9454935,
+          60.1840577
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "alkuviini",
+        "name": "Alkuviini",
+        "address": "Hakaniemen torikatu (Hakaniementori), 00530 Helsinki",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1793876,24.9514842",
+        "amenity": "bar",
+        "closed_days": "",
+        "hours_text": "Daily 11–23 (summer kiosk at Hakaniementori; weekends may open 09)",
+        "opens_min": 660,
+        "closes_min": 1380
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9514842,
+          60.1793876
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mamas_empanadas",
+        "name": "Mamas Empanadas",
+        "address": "Vaasankatu 11, 00500 Helsinki",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1884594,24.9585096",
+        "amenity": "restaurant",
+        "closed_days": "Sun",
+        "hours_text": "Mon–Fri 12–22, Sat 10–22, Sun closed",
+        "opens_min": 720,
+        "closes_min": 1320
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9585096,
+          60.1884594
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "way_bakery",
+        "name": "Way Bakery",
+        "address": "Agricolankatu 9, 00530 Helsinki",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1843942,24.9536288",
+        "amenity": "bakery",
+        "closed_days": "",
+        "hours_text": "Mon–Fri 8–19, Sat 9–19, Sun 9–16",
+        "opens_min": 480,
+        "closes_min": 1140
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9536288,
+          60.1843942
         ]
       }
     }

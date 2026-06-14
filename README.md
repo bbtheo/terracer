@@ -13,10 +13,12 @@ how much of it is lit by the sun.
 - **Interactive dashboard** — pick a date and hour and instantly see how many
   terraces are sunny, the sunniest spot, the average sunlight, and how many sun
   hours are left in the day.
-- **"Sunniest now" ranking** — all terraces sorted by the share of the terrace
-  in sun; click a row to inspect one.
-- **Per-terrace detail** — % of the terrace lit, the best sunny hour, an hourly
-  **day timeline** (08:00–23:00), address, and a Google Maps link.
+- **"Open & sunny" ranking** — terraces ordered by how much *open-and-sunny*
+  time is left today: the bar must be open (real per-bar opening hours) and the
+  terrace in sun. Click a row to inspect one.
+- **Per-terrace detail** — % of the terrace lit, open/closed status + opening
+  hours, the remaining open-and-sunny time, a half-hourly **day timeline**
+  (08:00–23:00), address, and a Google Maps link.
 - **3D map** — terraces coloured on a shade→sun gradient over extruded Kallio
   buildings, with a **sun-direction compass** showing where the sun is
   (azimuth + elevation, or "below horizon").
@@ -43,7 +45,8 @@ terrace per datetime) is stored in a small parquet table the app reads at
 runtime, so the UI stays fast.
 
 The current sun/shade table covers **2026**, sampled **biweekly** across the
-year at **hourly** times from **08:00 to 23:00**, for **39 terraces**.
+year at **half-hourly** times from **08:00 to 23:00**, for **43 terraces**
+(each with real opening hours).
 
 ## Quick start
 
@@ -72,7 +75,7 @@ src/
   core/           Shared logic — sun position, mesh loading, ray casting, terraces
   preprocessing/  Offline pipeline — download, parse CityGML, compute shadows
 data/
-  terraces.geojson            39 terrace locations + metadata
+  terraces.geojson            43 terrace locations + opening hours + metadata
   terrace_polygons.geojson    permit terrace polygons matched to bars
   processed/buildings.parquet building footprints + heights
   shadows/terrace_shadows.parquet  precomputed sun/shade table

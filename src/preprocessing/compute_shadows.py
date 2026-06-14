@@ -41,23 +41,29 @@ def _date_range(start: date, end: date, day_step: int) -> list[date]:
     return dates
 
 
-def _time_grid(hours: list[int]) -> list[time]:
-    return [time(hour=hour, minute=0) for hour in hours]
+def _time_grid(start_hour: int, end_hour: int, minute_step: int) -> list[time]:
+    """Times from start_hour:00 to end_hour:00 inclusive, every minute_step minutes."""
+    grid = []
+    minute = start_hour * 60
+    end = end_hour * 60
+    while minute <= end:
+        grid.append(time(hour=minute // 60, minute=minute % 60))
+        minute += minute_step
+    return grid
 
 
 def _build_datetimes(
     start_date: date,
     end_date: date,
     day_step: int,
-    hours: list[int],
+    times: list[time],
     tz: ZoneInfo,
 ) -> list[datetime]:
     dates = _date_range(start_date, end_date, day_step)
-    times = _time_grid(hours)
     datetimes = []
     for day in dates:
-        for hour in times:
-            datetimes.append(datetime.combine(day, hour, tzinfo=tz))
+        for t in times:
+            datetimes.append(datetime.combine(day, t, tzinfo=tz))
     return datetimes
 
 
@@ -128,9 +134,22 @@ def main() -> int:
         help="Day step for sampling (default: 14).",
     )
     parser.add_argument(
-        "--hours",
-        default="8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23",
-        help="Comma-separated hours for sampling (default: hourly 8..23).",
+        "--start-hour",
+        type=int,
+        default=8,
+        help="First hour of the daily time grid (default: 8).",
+    )
+    parser.add_argument(
+        "--end-hour",
+        type=int,
+        default=23,
+        help="Last hour of the daily time grid, inclusive (default: 23).",
+    )
+    parser.add_argument(
+        "--minute-step",
+        type=int,
+        default=30,
+        help="Minutes between samples within the day (default: 30 = half-hour).",
     )
     parser.add_argument(
         "--latitude",
@@ -250,12 +269,12 @@ def main() -> int:
 
     start_date = datetime.fromisoformat(args.start_date).date()
     end_date = datetime.fromisoformat(args.end_date).date()
-    hours = [int(value.strip()) for value in args.hours.split(",") if value.strip()]
+    times = _time_grid(args.start_hour, args.end_hour, args.minute_step)
     datetimes = _build_datetimes(
         start_date=start_date,
         end_date=end_date,
         day_step=args.day_step,
-        hours=hours,
+        times=times,
         tz=HELSINKI_TZ,
     )
 

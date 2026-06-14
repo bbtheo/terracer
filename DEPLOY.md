@@ -34,7 +34,7 @@ content item (or enabling auto-republish).
 
 ## Regenerating the data (offline, not needed to deploy)
 
-The sun/shade table is precomputed for **2026, hourly 08:00–23:00** on a
+The sun/shade table is precomputed for **2026, half-hourly 08:00–23:00** on a
 biweekly date grid:
 
 ```bash

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import html as _html
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import matplotlib
@@ -132,6 +132,13 @@ h1,h2,h3,h4,h5,h6 { font-weight: 650; }
 .chip-sun { background:#FFF6DE; color:#8A5A00; }
 .chip-shade { background:#ECEEF2; color:#5B6470; }
 [data-bs-theme="dark"] .chip-shade { background:#2A2A30; color:#AEB6C2; }
+.chip-open { background:#E7F6EC; color:#1a7f37; }
+.chip-closed { background:#FBEAEA; color:#b42318; }
+[data-bs-theme="dark"] .chip-open { background:#16301f; color:#5fd38a; }
+[data-bs-theme="dark"] .chip-closed { background:#3a1f1f; color:#f1a9a0; }
+.hours-line { color:var(--t-muted); font-size:.9rem; margin-top:.5rem; }
+.hours-line .open { color:#1a7f37; font-weight:700; }
+.hours-line .closed { color:#b42318; font-weight:700; }
 .chip-type {
   display:inline-block; border-radius:6px; padding:.05rem .45rem;
   font-size:.72rem; font-weight:650; background:var(--t-border); color:var(--t-muted);
@@ -199,14 +206,17 @@ when_toolbar = ui.card(
         ),
         ui.div(
             ui.input_slider(
-                "hour",
+                "time",
                 "Time of day",
-                min=8,
-                max=23,
-                value=14,
-                step=1,
+                # UTC-aware + timezone "+0000" so the slider shows the literal
+                # wall-clock time (08:00–23:00) and reads it back unshifted.
+                min=datetime(2026, 1, 1, 8, 0, tzinfo=timezone.utc),
+                max=datetime(2026, 1, 1, 23, 0, tzinfo=timezone.utc),
+                value=datetime(2026, 1, 1, 14, 0, tzinfo=timezone.utc),
+                step=1800,  # 30-minute steps, in seconds → half-hourly
+                time_format="%H:%M",
+                timezone="+0000",
                 ticks=False,
-                post=":00",
                 width="100%",
             ),
             ui.div(
@@ -231,7 +241,7 @@ kpi_band = ui.layout_columns(
         theme=ui.value_box_theme(bg="#FFB703", fg="#3a2f00"),
     ),
     ui.value_box(
-        "Sunniest spot",
+        "Best right now",
         ui.output_ui("vb_best"),
         showcase=ui.HTML('<i class="bi bi-trophy"></i>'),
         theme=ui.value_box_theme(bg="#FB8500", fg="#ffffff"),
@@ -243,7 +253,7 @@ kpi_band = ui.layout_columns(
         theme=ui.value_box_theme(fg="#FB8500"),
     ),
     ui.value_box(
-        "Sun left today",
+        "Open + sun left",
         ui.output_text("vb_left"),
         showcase=ui.HTML('<i class="bi bi-hourglass-split"></i>'),
         theme=ui.value_box_theme(bg="#FFD166", fg="#3a2f00"),
@@ -253,7 +263,7 @@ kpi_band = ui.layout_columns(
 
 rank_card = ui.card(
     ui.card_header(
-        "Sunniest now — ",
+        ui.HTML('<i class="bi bi-trophy"></i> Open &amp; sunny — '),
         ui.output_text("rank_when", inline=True),
         ui.span(
             ui.HTML('<i class="bi bi-hand-index"></i> Click a row to inspect a terrace'),
@@ -352,26 +362,19 @@ def _unicode_bar(frac: float) -> str:
     return "█" * n + "░" * (8 - n)
 
 
-def _sun_glyph(frac: float) -> str:
-    if frac >= 0.66:
-        return "☀"
-    if frac > 0.0:
-        return "⛅"
-    return "☁"
-
-
 def _grid_df(ranked):
     return ranked.assign(
         **{
             "#": ranked["Rank"],
             "Terrace": ranked["name"],
             "Type": ranked["amenity"],
-            "% in sun": ranked["sun_fraction"].apply(
+            "Open-sun left": ranked["osl_slots"].apply(lambda s: D.fmt_duration(int(s))),
+            "% now": ranked["sun_fraction"].apply(
                 lambda f: f"{f:.0%}  {_unicode_bar(f)}"
             ),
-            "Sun?": ranked["sun_fraction"].apply(_sun_glyph),
+            "Open": ranked["open_now"].apply(lambda o: "open" if bool(o) else "closed"),
         }
-    )[["#", "Terrace", "Type", "% in sun", "Sun?"]]
+    )[["#", "Terrace", "Type", "Open-sun left", "% now", "Open"]]
 
 
 def _embed_iframe(deck_html: str, height: str) -> ui.HTML:
@@ -402,22 +405,28 @@ def server(input, output, session):
 
     @reactive.calc
     def snapped():
-        """(snapped_datetime, was_snapped, requested_date)."""
+        """(snapped_date, selected_minutes, datetime, was_snapped, requested_date)."""
         req_date = input.date()
         if not isinstance(req_date, date):
             req_date = DEFAULT_DATE
         snap_d, was = D.snap_date(req_date)
-        dt = D.make_datetime(snap_d, int(input.hour()))
-        return dt, was, req_date
+        t = input.time()  # a datetime on the slider's reference day
+        minutes = t.hour * 60 + t.minute
+        # Snap to the nearest half-hour slot and clamp into the sampled window.
+        minutes = int(round(minutes / D.SLOT_STEP_MIN) * D.SLOT_STEP_MIN)
+        minutes = max(D.SLOT_START_MIN, min(D.SLOT_END_MIN, minutes))
+        dt = D.make_datetime(snap_d, minutes)
+        return snap_d, minutes, dt, was, req_date
 
     @reactive.calc
     def snapshot_df():
-        dt, _, _ = snapped()
+        _, _, dt, _, _ = snapped()
         return D.snapshot_for(SHADOWS, TERRACES, dt)
 
     @reactive.calc
     def ranked():
-        return D.rank(snapshot_df())
+        snap_d, minutes, _, _, req_date = snapped()
+        return D.ranked_for(SHADOWS, TERRACES, snap_d, minutes, req_date=req_date)
 
     # --- Resolve grid selection -> stable terrace_id ---
     @reactive.effect
@@ -445,17 +454,17 @@ def server(input, output, session):
         r = ranked()
         if sid is None or sid not in set(r["terrace_id"]):
             sid = r["terrace_id"].iloc[0] if len(r) else None
-        dt, _, _ = snapped()
+        snap_d, minutes, dt, _, _ = snapped()
         row = r[r["terrace_id"] == sid]
         rec = row.iloc[0].to_dict() if len(row) else None
-        prof = D.day_profile(SHADOWS, sid, dt.date()) if sid else None
-        return {"id": sid, "rec": rec, "profile": prof, "dt": dt}
+        prof = D.day_profile(SHADOWS, sid, snap_d) if sid else None
+        return {"id": sid, "rec": rec, "profile": prof, "dt": dt, "minutes": minutes}
 
     # ---------------- Navbar live labels ----------------
     @render.text
     def when_label():
-        dt, _, _ = snapped()
-        return dt.strftime("%-d %b · %H:00")
+        _, minutes, _, _, req = snapped()
+        return f"{req.strftime('%-d %b')} · {D.fmt_minutes(minutes)}"
 
     @render.ui
     def sun_badge():
@@ -465,12 +474,12 @@ def server(input, output, session):
 
     @render.ui
     def snap_note():
-        dt, was, req = snapped()
+        _, _, dt, was, req = snapped()
         if was:
             return ui.HTML(
-                f'<div class="snap-note"><i class="bi bi-calendar-event"></i> '
-                f"Nearest sample: <b>{_fmt_date(dt.date())}</b> "
-                f"(you picked {_fmt_short(req)})</div>"
+                f'<div class="snap-note"><i class="bi bi-brightness-alt-high"></i> '
+                f"Sun pattern from nearest sample <b>{_fmt_date(dt.date())}</b> "
+                f"(opening hours use your picked day, {_fmt_short(req)})</div>"
             )
         return ui.HTML(
             '<div class="snap-note exact"><i class="bi bi-check-circle"></i> '
@@ -479,15 +488,15 @@ def server(input, output, session):
 
     @render.text
     def map_snap_chip():
-        dt, was, _ = snapped()
+        _, minutes, dt, was, _ = snapped()
         if was:
-            return f"Showing nearest sample: {_fmt_date(dt.date())} · {dt.strftime('%H:00')}"
+            return f"Sun from nearest sample: {_fmt_date(dt.date())}"
         return ""
 
     @render.text
     def rank_when():
-        dt, _, _ = snapped()
-        return f"{_fmt_date(dt.date())}, {dt.strftime('%H:00')}"
+        _, minutes, _, _, req = snapped()
+        return f"{_fmt_date(req)}, {D.fmt_minutes(minutes)}"
 
     # ---------------- KPI value boxes ----------------
     @render.text
@@ -501,12 +510,13 @@ def server(input, output, session):
         if not len(r):
             return ui.span("—")
         top = r.iloc[0]
-        if top["sun_fraction"] <= 0:
-            return ui.span("No sun anywhere")
+        if int(top["osl_slots"]) <= 0:
+            return ui.span("Nothing open & sunny")
         return ui.HTML(
-            f'<div style="font-size:1.1rem;font-weight:700;line-height:1.1">'
+            f'<div style="font-size:1.05rem;font-weight:700;line-height:1.1">'
             f"{_html.escape(str(top['name']))}</div>"
-            f'<div style="font-size:.9rem;opacity:.9">{int(top["pct"])}% lit</div>'
+            f'<div style="font-size:.85rem;opacity:.9">'
+            f'{D.fmt_duration(int(top["osl_slots"]))} of open sun left</div>'
         )
 
     @render.text
@@ -517,11 +527,11 @@ def server(input, output, session):
     @render.text
     def vb_left():
         ctx = detail_ctx()
-        prof = ctx["profile"]
-        if prof is None:
+        rec = ctx["rec"]
+        if rec is None:
             return "—"
-        left = D.sun_hours_left(prof, ctx["dt"].hour)
-        return f"{left}h" if left > 0 else "None left"
+        slots = int(rec.get("osl_slots", 0) or 0)
+        return D.fmt_duration(slots) if slots > 0 else "None"
 
     # ---------------- Ranked grid ----------------
     @render.data_frame
@@ -529,22 +539,32 @@ def server(input, output, session):
         r = ranked()
         df = _grid_df(r)
         fracs = r["sun_fraction"].tolist()
+        opens = r["open_now"].tolist()
         dark = is_dark()
 
         def style_fn(_data):
             infos = []
-            for i, f in enumerate(fracs):
-                hexc = D.hex_color(f, dark=dark)
-                fg = D.readable_fg(f, dark=dark)
+            for i, (f, is_open) in enumerate(zip(fracs, opens)):
                 infos.append(
                     {
                         "location": "body",
                         "rows": [i],
-                        "cols": ["% in sun"],
+                        "cols": ["% now"],
                         "style": {
-                            "background-color": hexc,
-                            "color": fg,
+                            "background-color": D.hex_color(f, dark=dark),
+                            "color": D.readable_fg(f, dark=dark),
                             "font-variant-numeric": "tabular-nums",
+                            "font-weight": "600",
+                        },
+                    }
+                )
+                infos.append(
+                    {
+                        "location": "body",
+                        "rows": [i],
+                        "cols": ["Open"],
+                        "style": {
+                            "color": "#1a7f37" if is_open else "#b42318",
                             "font-weight": "600",
                         },
                     }
@@ -577,10 +597,20 @@ def server(input, output, session):
                 '<span class="status-chip chip-shade">'
                 '<i class="bi bi-cloud"></i> In shade</span>'
             )
+        if bool(rec.get("open_now", True)):
+            open_chip = (
+                '<span class="status-chip chip-open">'
+                '<i class="bi bi-door-open"></i> Open now</span>'
+            )
+        else:
+            open_chip = (
+                '<span class="status-chip chip-closed">'
+                '<i class="bi bi-door-closed"></i> Closed now</span>'
+            )
         return ui.HTML(
             f"{_html.escape(str(rec['name']))}"
             f'<span class="chip-type">{_html.escape(str(rec["amenity"]))}</span>'
-            f"{chip}"
+            f"{chip}{open_chip}"
         )
 
     @render.ui
@@ -615,23 +645,42 @@ def server(input, output, session):
             showcase=ui.HTML('<i class="bi bi-brightness-high"></i>'),
             theme=ui.value_box_theme(bg="#FFB703", fg="#3a2f00"),
         )
-        if bh_hour is None:
-            best_txt = "No sun today"
-        else:
-            best_txt = f"{bh_hour:02d}:00 ({int(round(bh_frac*100))}%)"
+        osl_slots = int(rec.get("osl_slots", 0) or 0)
         d3 = ui.value_box(
-            "Best sunny hour",
-            best_txt,
-            showcase=ui.HTML('<i class="bi bi-brightness-high"></i>'),
-            theme=ui.value_box_theme(fg="#FB8500"),
+            "Open + sun left",
+            D.fmt_duration(osl_slots) if osl_slots > 0 else "None",
+            showcase=ui.HTML('<i class="bi bi-hourglass-split"></i>'),
+            theme=ui.value_box_theme(bg="#FFD166", fg="#3a2f00"),
         )
 
+        # Opening-hours line (with live open/closed status) + best sunny time.
+        open_now = bool(rec.get("open_now", True))
+        hours_text = _html.escape(str(rec.get("hours_text") or "hours unknown"))
+        status = (
+            '<span class="open">● Open now</span>'
+            if open_now
+            else '<span class="closed">● Closed now</span>'
+        )
         meta = [
+            ui.HTML(
+                f'<div class="hours-line"><i class="bi bi-clock"></i> '
+                f"{status} · {hours_text}</div>"
+            )
+        ]
+        if bh_hour is not None:
+            meta.append(
+                ui.HTML(
+                    f'<div class="detail-meta"><i class="bi bi-brightness-high"></i> '
+                    f"Sunniest at {D.fmt_minutes(bh_hour)} "
+                    f"({int(round(bh_frac*100))}% lit)</div>"
+                )
+            )
+        meta.append(
             ui.HTML(
                 f'<div class="detail-meta"><i class="bi bi-geo-alt"></i> '
                 f"{_html.escape(str(rec.get('address') or ''))}</div>"
             )
-        ]
+        )
         maps_url = rec.get("maps_url")
         if maps_url:
             meta.append(
@@ -666,7 +715,7 @@ def server(input, output, session):
         ctx = detail_ctx()
         prof = ctx["profile"]
         dark = is_dark()
-        cur_hour = ctx["dt"].hour
+        cur_minutes = int(ctx["minutes"])
 
         fig, ax = plt.subplots(figsize=(6, 1.0))
         fig.patch.set_alpha(0.0)
@@ -678,19 +727,15 @@ def server(input, output, session):
             plt.close(fig)
             return fig
 
-        hours = prof["hour"].tolist()
-        n = len(hours)
+        minutes = prof["minutes"].tolist()
+        n = len(minutes)
         for i, (_, row) in enumerate(prof.iterrows()):
             f = float(row["sun_fraction"])
-            color = D.hex_color(f, dark=dark)
-            ax.barh(
-                0, width=0.92, left=i + 0.04, height=0.8, color=color,
-                edgecolor="white", linewidth=1.2,
-            )
-            if int(row["hour"]) == int(cur_hour):
+            # No per-bar white edge at half-hour density; whole-hour ticks below.
+            ax.barh(0, width=1.0, left=i, height=0.8, color=D.hex_color(f, dark=dark))
+            if int(row["minutes"]) == cur_minutes:
                 ax.barh(
-                    0, width=0.92, left=i + 0.04, height=0.8,
-                    facecolor="none",
+                    0, width=1.0, left=i, height=0.8, facecolor="none",
                     edgecolor=("#FFD166" if dark else "#2B2118"), linewidth=2.4,
                 )
                 ax.annotate(
@@ -698,11 +743,15 @@ def server(input, output, session):
                     color=tick_color, fontsize=11,
                 )
 
+        # Tick only on whole hours (every other half-hour slot).
+        hour_pos = [i for i, m in enumerate(minutes) if m % 60 == 0]
         ax.set_xlim(0, n)
         ax.set_ylim(-0.5, 0.6)
         ax.set_yticks([])
-        ax.set_xticks([i + 0.5 for i in range(n)])
-        ax.set_xticklabels([str(h) for h in hours], color=tick_color, fontsize=7.5)
+        ax.set_xticks([i + 0.5 for i in hour_pos])
+        ax.set_xticklabels(
+            [str(minutes[i] // 60) for i in hour_pos], color=tick_color, fontsize=8
+        )
         ax.tick_params(length=0)
         for spine in ax.spines.values():
             spine.set_visible(False)
@@ -713,7 +762,7 @@ def server(input, output, session):
     # ---------------- Maps ----------------
     @reactive.calc
     def deck_html_dash():
-        dt, _, _ = snapped()
+        _, _, dt, _, _ = snapped()
         df = D.snapshot_for(SHADOWS, TERRACES, dt)
         return D.build_deck_html(
             df, selected_id(), BUILDINGS, PERMITS, is_dark(), dt=dt, zoom=13.7
@@ -721,7 +770,7 @@ def server(input, output, session):
 
     @reactive.calc
     def deck_html_big():
-        dt, _, _ = snapped()
+        _, _, dt, _, _ = snapped()
         df = D.snapshot_for(SHADOWS, TERRACES, dt)
         return D.build_deck_html(
             df, selected_id(), BUILDINGS, PERMITS, is_dark(), dt=dt, zoom=14.2
@@ -737,7 +786,7 @@ def server(input, output, session):
 
     @render.ui
     def map_legend():
-        dt, _, _ = snapped()
+        _, _, dt, _, _ = snapped()
         az, alt = D.sun_az_alt(dt)
         if alt > 0:
             sun_txt = (

@@ -21,8 +21,16 @@ from shapely.geometry import box
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 HELSINKI_TZ = ZoneInfo("Europe/Helsinki")
 
-# The reachable hours on the slider (hourly, 8:00..23:00).
-HOURS = tuple(range(8, 24))
+# Sampling grid: half-hourly, 08:00..23:00 inclusive (minutes from midnight).
+SLOT_START_MIN = 8 * 60
+SLOT_END_MIN = 23 * 60
+SLOT_STEP_MIN = 30
+SLOT_MINUTES = tuple(range(SLOT_START_MIN, SLOT_END_MIN + 1, SLOT_STEP_MIN))  # 31 slots
+SLOT_HOURS = SLOT_STEP_MIN / 60.0  # 0.5 h represented by each lit slot
+HOURS = tuple(range(8, 24))  # whole clock hours the grid spans (axis labels)
+
+_WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+_WEEKDAY_IDX = {name: i for i, name in enumerate(_WEEKDAYS)}  # Mon=0 .. Sun=6
 
 # Cluster centroid (verified): lon 24.9515 / lat 60.1836.
 CENTER_LON = 24.9515
@@ -58,7 +66,12 @@ _DARK_SHADE_END = (0x51, 0x5A, 0x6B)
 # Loaders (cached once)
 # ---------------------------------------------------------------------------
 def load_terraces() -> gpd.GeoDataFrame:
-    """37 terraces with lon/lat columns added (EPSG:4326)."""
+    """All terraces with lon/lat + parsed opening-hours columns (EPSG:4326).
+
+    Opening-hours columns: opens_min/closes_min (minutes from midnight, -1 if
+    unknown), closed_days_set (frozenset of weekday indices Mon=0..Sun=6),
+    hours_text (human-readable schedule).
+    """
     gdf = gpd.read_file(DATA_DIR / "terraces.geojson")
     if gdf.crs is None:
         gdf = gdf.set_crs("EPSG:4326")
@@ -67,6 +80,14 @@ def load_terraces() -> gpd.GeoDataFrame:
     gdf["id"] = gdf["id"].astype(str)
     gdf["lon"] = gdf.geometry.x
     gdf["lat"] = gdf.geometry.y
+
+    gdf["opens_min"] = gdf.get("opens_min", -1)
+    gdf["opens_min"] = pd.to_numeric(gdf["opens_min"], errors="coerce").fillna(-1).astype(int)
+    gdf["closes_min"] = gdf.get("closes_min", -1)
+    gdf["closes_min"] = pd.to_numeric(gdf["closes_min"], errors="coerce").fillna(-1).astype(int)
+    gdf["hours_text"] = gdf.get("hours_text", "").fillna("")
+    raw_closed = gdf.get("closed_days", "")
+    gdf["closed_days_set"] = raw_closed.fillna("").apply(_parse_closed_days)
     return gdf
 
 
@@ -164,9 +185,62 @@ def snap_date(d: date) -> tuple[date, bool]:
     return best, True
 
 
-def make_datetime(d: date, hour: int) -> datetime:
-    """Combine a date + hour into a tz-aware Europe/Helsinki datetime."""
-    return datetime.combine(d, time(hour=int(hour)), tzinfo=HELSINKI_TZ)
+def make_datetime(d: date, minutes: int) -> datetime:
+    """Combine a date + minutes-from-midnight into a tz-aware Helsinki datetime."""
+    minutes = int(minutes)
+    return datetime(d.year, d.month, d.day, minutes // 60, minutes % 60, tzinfo=HELSINKI_TZ)
+
+
+# ---------------------------------------------------------------------------
+# Time / opening-hours helpers
+# ---------------------------------------------------------------------------
+def _parse_closed_days(value) -> frozenset:
+    """'Mon,Sun' -> frozenset({0, 6}); empty -> empty set."""
+    if not value or not isinstance(value, str):
+        return frozenset()
+    return frozenset(
+        _WEEKDAY_IDX[token.strip()]
+        for token in value.split(",")
+        if token.strip() in _WEEKDAY_IDX
+    )
+
+
+def fmt_minutes(minutes: int) -> str:
+    """990 -> '16:30'. Minutes past 24:00 wrap (1560 -> '02:00')."""
+    minutes = int(minutes) % (24 * 60)
+    return f"{minutes // 60:02d}:{minutes % 60:02d}"
+
+
+def fmt_duration(slots: int) -> str:
+    """A count of half-hour slots -> '3h 30m' / '2h' / '30m' / 'none'."""
+    total = int(slots) * SLOT_STEP_MIN
+    if total <= 0:
+        return "none"
+    h, m = divmod(total, 60)
+    if h and m:
+        return f"{h}h {m}m"
+    return f"{h}h" if h else f"{m}m"
+
+
+def _effective_close(opens_min: int, closes_min: int) -> int:
+    """Closing minute clamped into a same-day frame for our 08:00–23:00 window.
+
+    A close that is <= open means it crosses midnight (e.g. opens 16:00, closes
+    02:00) -> treat as open through end of day. Unknown close -> end of day.
+    """
+    if closes_min is None or closes_min < 0 or closes_min <= opens_min:
+        return 24 * 60
+    return closes_min
+
+
+def is_open_at(opens_min: int, closes_min: int, closed_days_set, dt: datetime) -> bool:
+    """Whether a venue is open at datetime `dt` given its parsed hours."""
+    if int(opens_min) < 0:
+        return True  # unknown hours -> assume open
+    if dt.weekday() in (closed_days_set or frozenset()):
+        return False
+    minutes = dt.hour * 60 + dt.minute
+    return int(opens_min) <= minutes < _effective_close(int(opens_min), int(closes_min))
 
 
 # ---------------------------------------------------------------------------
@@ -272,36 +346,123 @@ def rank(snapshot_df: pd.DataFrame) -> pd.DataFrame:
 def day_profile(
     shadows: pd.DataFrame, terrace_id: str, d: date
 ) -> pd.DataFrame:
-    """7-row frame (hour, in_sun, sun_fraction) for the given terrace/date.
+    """Half-hourly frame (minutes, hour, in_sun, sun_fraction) for terrace/date.
 
-    Always returns exactly the 7 grid hours; missing hours -> shade.
+    Always returns exactly the SLOT_MINUTES grid (08:00..23:00 every 30 min);
+    missing slots -> shade. `hour` is a float (e.g. 14.5) for axis labelling.
     """
     sub = shadows[
         (shadows["terrace_id"] == str(terrace_id))
         & (shadows["datetime"].dt.date == d)
     ].copy()
-    sub["hour"] = sub["datetime"].dt.hour
-    sub = sub[["hour", "in_sun", "sun_fraction"]]
-    grid = pd.DataFrame({"hour": list(HOURS)})
-    out = grid.merge(sub, on="hour", how="left")
+    sub["minutes"] = sub["datetime"].dt.hour * 60 + sub["datetime"].dt.minute
+    sub = sub[["minutes", "in_sun", "sun_fraction"]]
+    grid = pd.DataFrame({"minutes": list(SLOT_MINUTES)})
+    out = grid.merge(sub, on="minutes", how="left")
     out["in_sun"] = out["in_sun"].fillna(False).astype(bool)
     out["sun_fraction"] = out["sun_fraction"].fillna(0.0).astype(float)
+    out["hour"] = out["minutes"] / 60.0
     return out.reset_index(drop=True)
 
 
-def sun_hours_left(profile_df: pd.DataFrame, current_hour: int) -> int:
-    """Sunlit hours remaining from current_hour onward (1h per lit sample)."""
-    rest = profile_df[profile_df["hour"] >= int(current_hour)]
-    return int(rest["in_sun"].sum())
+def sun_hours_left(profile_df: pd.DataFrame, from_minutes: int) -> float:
+    """Sunlit hours remaining from `from_minutes` onward (0.5 h per lit slot)."""
+    rest = profile_df[profile_df["minutes"] >= int(from_minutes)]
+    return int(rest["in_sun"].sum()) * SLOT_HOURS
 
 
 def best_hour(profile_df: pd.DataFrame) -> tuple[int | None, float]:
-    """(hour, fraction) of the sunniest sample; (None, 0.0) if no sun."""
+    """(minutes-from-midnight, fraction) of the sunniest slot; (None, 0.0) if none."""
     if profile_df.empty or float(profile_df["sun_fraction"].max()) <= 0.0:
         return None, 0.0
     idx = int(profile_df["sun_fraction"].idxmax())
     row = profile_df.loc[idx]
-    return int(row["hour"]), float(row["sun_fraction"])
+    return int(row["minutes"]), float(row["sun_fraction"])
+
+
+def open_sun_left_table(
+    shadows: pd.DataFrame,
+    terraces: gpd.GeoDataFrame,
+    sun_date: date,
+    from_minutes: int,
+    weekday: int,
+) -> pd.Series:
+    """Series indexed by terrace_id: remaining half-hour slots that are BOTH in
+    sun AND within opening hours, from `from_minutes` onward.
+
+    Sun is read from `sun_date` (the nearest sampled date), but the open/closed
+    test uses `weekday` (the weekday of the date the user actually picked).
+    """
+    ids = terraces["id"].astype(str)
+    sub = shadows[shadows["datetime"].dt.date == sun_date]
+    if sub.empty:
+        return pd.Series(0, index=ids.values, dtype=int)
+    sub = sub[sub["in_sun"]].copy()
+    sub["minutes"] = sub["datetime"].dt.hour * 60 + sub["datetime"].dt.minute
+    sub = sub[sub["minutes"] >= int(from_minutes)]
+    info = terraces[["id", "opens_min", "closes_min", "closed_days_set"]].rename(
+        columns={"id": "terrace_id"}
+    )
+    info["terrace_id"] = info["terrace_id"].astype(str)
+    m = sub.merge(info, on="terrace_id", how="left")
+    if len(m):
+        opens = m["opens_min"].fillna(-1).astype(int)
+        closes = m["closes_min"].fillna(-1).astype(int)
+        eff_close = closes.where((closes > opens) & (closes >= 0), 24 * 60)
+        open_known = opens >= 0
+        time_ok = (~open_known) | ((m["minutes"] >= opens) & (m["minutes"] < eff_close))
+        not_closed = ~m["closed_days_set"].apply(
+            lambda s: weekday in s if isinstance(s, frozenset) else False
+        )
+        counts = m[time_ok & not_closed].groupby("terrace_id").size()
+    else:
+        counts = pd.Series(dtype=int)
+    return counts.reindex(ids.values, fill_value=0).astype(int)
+
+
+def ranked_for(
+    shadows: pd.DataFrame,
+    terraces: gpd.GeoDataFrame,
+    sun_date: date,
+    from_minutes: int,
+    req_date: date | None = None,
+) -> pd.DataFrame:
+    """Terraces ranked by remaining OPEN-AND-SUNNY time today (descending).
+
+    Sun comes from `sun_date` (nearest sampled date); opening hours use
+    `req_date` (the date the user actually picked, default = sun_date). Adds:
+      osl_slots  - remaining open+sunny half-hour slots from from_minutes
+      osl_hours  - that as hours (0.5 each)
+      open_now   - whether the bar is open at the requested date + selected time
+      hours_text / opens_min / closes_min / closed_days_set - for display
+    Sort: osl_slots desc, then current sun_fraction desc, then name.
+    """
+    if req_date is None:
+        req_date = sun_date
+    dt_sun = make_datetime(sun_date, from_minutes)
+    dt_open = make_datetime(req_date, from_minutes)
+    snap = snapshot_for(shadows, terraces, dt_sun)
+    osl = open_sun_left_table(
+        shadows, terraces, sun_date, from_minutes, req_date.weekday()
+    )
+    meta = terraces[
+        ["id", "opens_min", "closes_min", "closed_days_set", "hours_text"]
+    ].rename(columns={"id": "terrace_id"})
+    meta["terrace_id"] = meta["terrace_id"].astype(str)
+    out = snap.merge(meta, on="terrace_id", how="left")
+    out["osl_slots"] = out["terrace_id"].map(osl).fillna(0).astype(int)
+    out["osl_hours"] = out["osl_slots"] * SLOT_HOURS
+    out["open_now"] = out.apply(
+        lambda r: is_open_at(
+            r["opens_min"], r["closes_min"], r["closed_days_set"], dt_open
+        ),
+        axis=1,
+    )
+    out = out.sort_values(
+        ["osl_slots", "sun_fraction", "name"], ascending=[False, False, True]
+    ).reset_index(drop=True)
+    out["Rank"] = range(1, len(out) + 1)
+    return out
 
 
 # ---------------------------------------------------------------------------
