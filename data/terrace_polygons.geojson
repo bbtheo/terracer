@@ -1,0 +1,497 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "bar_loosister",
+        "bar_name": "Bar Loosister",
+        "permit_name": "Bar Loosister",
+        "permit_id": "VP2200077",
+        "distance_m": 2.2,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.961203,
+                60.18705703
+              ],
+              [
+                24.96118,
+                60.18705803
+              ],
+              [
+                24.961156,
+                60.18694503
+              ],
+              [
+                24.961179,
+                60.18694303
+              ],
+              [
+                24.961203,
+                60.18705703
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "femma_iv",
+        "bar_name": "Femma IV",
+        "permit_name": "Ravintola Femma",
+        "permit_id": "VP2200225",
+        "distance_m": 9.5,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.954485,
+                60.18267903
+              ],
+              [
+                24.954501,
+                60.18268903
+              ],
+              [
+                24.954422,
+                60.18272003
+              ],
+              [
+                24.954406,
+                60.18271003
+              ],
+              [
+                24.954485,
+                60.18267903
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "helsing_bar",
+        "bar_name": "Helsing Bar",
+        "permit_name": "Helsing Bar",
+        "permit_id": "VP2200261",
+        "distance_m": 1.9,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.951723,
+                60.18489203
+              ],
+              [
+                24.951688,
+                60.18489103
+              ],
+              [
+                24.951701,
+                60.18478703
+              ],
+              [
+                24.951735,
+                60.18478803
+              ],
+              [
+                24.951723,
+                60.18489203
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "hendricks_pub_kallio",
+        "bar_name": "Hendricks Pub Kallio",
+        "permit_name": "Hendricks Pub & Seurahuone",
+        "permit_id": "VP2400158",
+        "distance_m": 2.8,
+        "similarity": 0.67
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.952823,
+                60.18500103
+              ],
+              [
+                24.952858,
+                60.18500203
+              ],
+              [
+                24.952845,
+                60.18511503
+              ],
+              [
+                24.952811,
+                60.18511403
+              ],
+              [
+                24.952823,
+                60.18500103
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "4",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "hogohuone",
+        "bar_name": "HogoHuone",
+        "permit_name": "Hogo Huone",
+        "permit_id": "VP2200075-2",
+        "distance_m": 3.3,
+        "similarity": 0.95
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.954245,
+                60.18301803
+              ],
+              [
+                24.954268,
+                60.18303203
+              ],
+              [
+                24.954221,
+                60.18305103
+              ],
+              [
+                24.954198,
+                60.18303703
+              ],
+              [
+                24.954245,
+                60.18301803
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "5",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "las_vegas",
+        "bar_name": "Las Vegas",
+        "permit_name": "Ravintola Las Vegas",
+        "permit_id": "VP2200189",
+        "distance_m": 2.4,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.953587,
+                60.18302703
+              ],
+              [
+                24.9536,
+                60.18303503
+              ],
+              [
+                24.953484,
+                60.18308103
+              ],
+              [
+                24.953471,
+                60.18307303
+              ],
+              [
+                24.953587,
+                60.18302703
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "6",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "majava_baari",
+        "bar_name": "Majava Baari",
+        "permit_name": "Beaver Bar / Majava Baari",
+        "permit_id": "VP2200100-2",
+        "distance_m": 5.4,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.952648,
+                60.18283203
+              ],
+              [
+                24.952672,
+                60.18282303
+              ],
+              [
+                24.952726,
+                60.18285703
+              ],
+              [
+                24.952702,
+                60.18286603
+              ],
+              [
+                24.952648,
+                60.18283203
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "7",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "mascot_bar_live_stage",
+        "bar_name": "Mascot Bar & Live Stage",
+        "permit_name": "Mascot",
+        "permit_id": "VP2200071-3",
+        "distance_m": 3.8,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.953924,
+                60.18172703
+              ],
+              [
+                24.953906,
+                60.18171603
+              ],
+              [
+                24.954074,
+                60.18165103
+              ],
+              [
+                24.954092,
+                60.18166203
+              ],
+              [
+                24.953924,
+                60.18172703
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "8",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "ruuhka",
+        "bar_name": "Ruuhka",
+        "permit_name": "Ruuhka Pub",
+        "permit_id": "VP2200693",
+        "distance_m": 3.6,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.958599,
+                60.18365703
+              ],
+              [
+                24.958634,
+                60.18364503
+              ],
+              [
+                24.958691,
+                60.18368603
+              ],
+              [
+                24.958656,
+                60.18369803
+              ],
+              [
+                24.958599,
+                60.18365703
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "9",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "rytmi",
+        "bar_name": "Rytmi",
+        "permit_name": "Ravintola Rytmi",
+        "permit_id": "VP2200470",
+        "distance_m": 3.0,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.950244,
+                60.18078503
+              ],
+              [
+                24.950263,
+                60.18079703
+              ],
+              [
+                24.949984,
+                60.18090503
+              ],
+              [
+                24.949965,
+                60.18089303
+              ],
+              [
+                24.950244,
+                60.18078503
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "10",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "sivukirjasto",
+        "bar_name": "Sivukirjasto",
+        "permit_name": "Sivukirjasto",
+        "permit_id": "VP2200296",
+        "distance_m": 4.7,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.953406,
+                60.18432403
+              ],
+              [
+                24.953405,
+                60.18433903
+              ],
+              [
+                24.953262,
+                60.18433703
+              ],
+              [
+                24.953263,
+                60.18432203
+              ],
+              [
+                24.953406,
+                60.18432403
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "11",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "william_k_kurvi",
+        "bar_name": "William K. Kurvi",
+        "permit_name": "William K. Kurvi",
+        "permit_id": "VP2200338",
+        "distance_m": 3.5,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.96141,
+                60.18743803
+              ],
+              [
+                24.961436,
+                60.18744703
+              ],
+              [
+                24.961343,
+                60.18751403
+              ],
+              [
+                24.961317,
+                60.18750503
+              ],
+              [
+                24.96141,
+                60.18743803
+              ]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Data files (large 3D models)
+data/raw/
+*.gml
+*.citygml
+*.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Pixi
+.pixi/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

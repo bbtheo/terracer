@@ -1,0 +1,634 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bar_lab",
+        "name": "Bar Lab",
+        "address": "Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1856073,24.9463414",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9463414,
+          60.1856073
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bar_loosister",
+        "name": "Bar Loosister",
+        "address": "Hämeentie 50, 00500 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1870486,24.9611381",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9611381,
+          60.1870486
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "barbers_beer_company",
+        "name": "Barbers & Beer Company",
+        "address": "Neljäs linja 17-19,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1842327,24.9480983",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9480983,
+          60.1842327
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "brooke",
+        "name": "Brooke",
+        "address": "Fleminginkatu 13,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1860976,24.9534724",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9534724,
+          60.1860976
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cafe_del_mar",
+        "name": "Cafe del Mar",
+        "address": "Viides linja 16, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1838739,24.951349",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.951349,
+          60.1838739
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cafe_ii_linja_23",
+        "name": "Cafe II-linja 23",
+        "address": "Toinen linja 23, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830793,24.9450873",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9450873,
+          60.1830793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cafe_talo",
+        "name": "Café Talo",
+        "address": "Hämeentie 2 B, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1803394,24.9506971",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9506971,
+          60.1803394
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "efes",
+        "name": "Efes",
+        "address": "Helsinginkatu 2a,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1874796,24.961081",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.961081,
+          60.1874796
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "femma_iv",
+        "name": "Femma IV",
+        "address": "Viides linja 4,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826029,24.9545637",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9545637,
+          60.1826029
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "flow_bar",
+        "name": "Flow Bar",
+        "address": "Castréninkatu 7, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.184793,24.9466581",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9466581,
+          60.184793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "flying_dutch",
+        "name": "Flying Dutch",
+        "address": "Pitkänsillanranta 2,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1766085,24.9492464",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9492464,
+          60.1766085
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "helsing_bar",
+        "name": "Helsing Bar",
+        "address": "Kaarlenkatu 3-5, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1848357,24.9517632",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9517632,
+          60.1848357
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "hendricks_pub_kallio",
+        "name": "Hendricks Pub Kallio",
+        "address": "Fleminginkatu 6, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849923,24.9527763",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9527763,
+          60.1849923
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "hogohuone",
+        "name": "HogoHuone",
+        "address": "Viides linja 7, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830292,24.9543267",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9543267,
+          60.1830292
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "juttutupa",
+        "name": "Juttutupa",
+        "address": "Säästöpankinranta 6, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.178912,24.9472739",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9472739,
+          60.178912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kallio_bar",
+        "name": "Kallio Bar",
+        "address": "Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1812246,24.9531387",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9531387,
+          60.1812246
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kallio_snadi_pub",
+        "name": "Kallio Snadi Pub",
+        "address": "Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1815265,24.9511895",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9511895,
+          60.1815265
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kuikka",
+        "name": "Kuikka",
+        "address": "Helsinginkatu 32, 00510 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862898,24.9465943",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9465943,
+          60.1862898
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "las_vegas",
+        "name": "Las Vegas",
+        "address": "Viides linja 8,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830343,24.9535006",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9535006,
+          60.1830343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "majava_baari",
+        "name": "Majava Baari",
+        "address": "Porthaninkatu 9, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1828064,24.95277",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.95277,
+          60.1828064
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mascot_bar_live_stage",
+        "name": "Mascot Bar & Live Stage",
+        "address": "Neljäs linja 2, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1816369,24.9539999",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9539999,
+          60.1816369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "musta_kissa",
+        "name": "Musta Kissa",
+        "address": "Toinen linja 15, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1823697,24.9468228",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9468228,
+          60.1823697
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "oiva",
+        "name": "Oiva",
+        "address": "Porthaninkatu 5, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1818092,24.9512706",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9512706,
+          60.1818092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "oluthuone_haka",
+        "name": "Oluthuone Haka",
+        "address": "Toinen linja 7, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1814269,24.9492686",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9492686,
+          60.1814269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "om_pu",
+        "name": "Om'pu",
+        "address": "Siltasaarenkatu 15, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826161,24.9497277",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9497277,
+          60.1826161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "pressapari",
+        "name": "Pressapari",
+        "address": "Wallininkatu 10,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849601,24.9431072",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9431072,
+          60.1849601
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "pub_porthan",
+        "name": "Pub Porthan",
+        "address": "Porthaninkatu 10, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1831699,24.952773",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.952773,
+          60.1831699
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "roskapankki",
+        "name": "Roskapankki",
+        "address": "Helsinginkatu 20, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1867726,24.9517696",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9517696,
+          60.1867726
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ruuhka",
+        "name": "Ruuhka",
+        "address": "Hämeentie 30,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1836906,24.9585671",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9585671,
+          60.1836906
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "rytmi",
+        "name": "Rytmi",
+        "address": "Toinen linja 2, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1808412,24.9500102",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9500102,
+          60.1808412
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "saloon_arizona",
+        "name": "Saloon Arizona",
+        "address": "Castréninkatu 7, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849314,24.9468794",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9468794,
+          60.1849314
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sirdie",
+        "name": "Sirdie",
+        "address": "Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1834848,24.9468123",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9468123,
+          60.1834848
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sivukirjasto",
+        "name": "Sivukirjasto",
+        "address": "Fleminginkatu 5, 00530 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1843808,24.9533486",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9533486,
+          60.1843808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "street_bar",
+        "name": "Street Bar",
+        "address": "Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1811619,24.9529671",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9529671,
+          60.1811619
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "struts",
+        "name": "Struts",
+        "address": "Fleminginkatu 13, 00500 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862837,24.9534519",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9534519,
+          60.1862837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "virkavapaa",
+        "name": "Virkavapaa",
+        "address": "Kaarlenkatu 10,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1861223,24.9512452",
+        "amenity": "pub"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9512452,
+          60.1861223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "william_k_kurvi",
+        "name": "William K. Kurvi",
+        "address": "Helsinginkatu 2a,  Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.187448,24.9613184",
+        "amenity": "bar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9613184,
+          60.187448
+        ]
+      }
+    }
+  ]
+}

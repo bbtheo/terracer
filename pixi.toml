@@ -1,0 +1,37 @@
+[project]
+name = "terracer"
+version = "0.1.0"
+description = "Sunshine checker for Helsinki terraces"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64"]
+
+[tasks]
+app = "shiny run src/app/app.py"
+shiny = "shiny run src/app/app.py"
+preprocess = "python -m src.preprocessing.run_pipeline"
+test = "pytest tests/"
+download = "python -m src.preprocessing.download_3d_model"
+download_mesh = "python -m src.preprocessing.download_mesh_tiles"
+parse = "python -m src.preprocessing.parse_citygml"
+fetch_polygons = "python -m src.preprocessing.fetch_terrace_polygons"
+shadows = "python -m src.preprocessing.compute_shadows"
+
+[dependencies]
+python = ">=3.11"
+numpy = ">=1.26"
+pandas = ">=2.0"
+geopandas = ">=0.14"
+shapely = ">=2.0"
+pyproj = ">=3.6"
+trimesh = ">=4.0"
+pysolar = ">=0.10"
+requests = ">=2.31"
+lxml = ">=5.0"
+pyarrow = ">=14.0"
+shiny = ">=0.6"
+pydeck = ">=0.8"
+pytest = ">=7.4"
+httpx = ">=0.25"
+tqdm = ">=4.66"
+rtree = ">=1.2"
+mapbox_earcut = ">=1.0"
