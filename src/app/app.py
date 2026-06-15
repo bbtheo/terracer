@@ -347,7 +347,6 @@ def _unicode_bar(frac: float) -> str:
 def _grid_df(ranked):
     return ranked.assign(
         **{
-            "#": ranked["Rank"],
             "Terrace": ranked["name"],
             "Type": ranked["amenity"],
             "Open-sun left": ranked["osl_slots"].apply(lambda s: D.fmt_duration(int(s))),
@@ -356,7 +355,7 @@ def _grid_df(ranked):
             ),
             "Open": ranked["open_now"].apply(lambda o: "open" if bool(o) else "closed"),
         }
-    )[["#", "Terrace", "Type", "Open-sun left", "% now", "Open"]]
+    )[["Terrace", "Type", "Open-sun left", "% now", "Open"]]
 
 
 def _embed_iframe(deck_html: str, height: str) -> ui.HTML:
@@ -786,6 +785,15 @@ def server(input, output, session):
                 ui.HTML(sun_txt),
                 class_="detail-meta",
                 style="margin-top:.6rem;",
+            ),
+            ui.div(
+                ui.HTML(
+                    '<span style="display:inline-block;width:22px;border-top:2px solid '
+                    '#2856aa;vertical-align:middle;margin-right:6px"></span>'
+                    "Blue outline = edge of the 3D building data"
+                ),
+                class_="detail-meta",
+                style="margin-top:.3rem;",
             ),
         )
 

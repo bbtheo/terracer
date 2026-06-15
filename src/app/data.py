@@ -37,7 +37,9 @@ CENTER_LON = 24.9515
 CENTER_LAT = 60.1836
 
 # Building clip margin around the terrace bbox, in metres.
-BUILDING_MARGIN_M = 150
+BUILDING_MARGIN_M = 450
+# The projected CRS the buildings parquet is stored in (GK25FIN).
+BUILDING_CRS = "EPSG:3879"
 
 def _today_ref() -> date:
     """Real today mapped onto the 2026 sample grid (by month/day) so the
@@ -130,6 +132,20 @@ def load_buildings_clipped() -> list[dict]:
             ring = [[float(x), float(y)] for x, y in part.exterior.coords]
             out.append({"polygon": ring, "elevation": elev})
     return out
+
+
+@lru_cache(maxsize=1)
+def building_clip_ring() -> list[list[float]]:
+    """Closed outline (lon/lat ring) of the 3D-building coverage area — the
+    terraces bbox expanded by BUILDING_MARGIN_M, matching load_buildings_clipped.
+    Drawn on the map so users see where the building data ends.
+    """
+    t_proj = load_terraces().to_crs(BUILDING_CRS)
+    minx, miny, maxx, maxy = t_proj.total_bounds
+    m = BUILDING_MARGIN_M
+    b = box(minx - m, miny - m, maxx + m, maxy + m)
+    g = gpd.GeoSeries([b], crs=BUILDING_CRS).to_crs("EPSG:4326").iloc[0]
+    return [[float(x), float(y)] for x, y in g.exterior.coords]
 
 
 def load_permit_polygons() -> gpd.GeoDataFrame:
@@ -632,6 +648,23 @@ def build_deck_html(
                 pickable=False,
             )
         )
+
+    # 1b. Coverage boundary — outline of the area where 3D buildings are shown,
+    #     so the abrupt edge of the building data reads as a deliberate limit.
+    boundary_color = [120, 175, 245, 230] if is_dark else [40, 90, 170, 210]
+    layers.append(
+        pdk.Layer(
+            "PolygonLayer",
+            data=[{"polygon": building_clip_ring()}],
+            get_polygon="polygon",
+            extruded=False,
+            filled=False,
+            stroked=True,
+            get_line_color=boundary_color,
+            line_width_min_pixels=2,
+            pickable=False,
+        )
+    )
 
     # 2. Permit polygons (optional nicety) — thin orange outline.
     fc = _permit_features(permits)
