@@ -37,15 +37,10 @@ DEFAULT_DATE = D.default_date()
 PERMIT_IDS = set(PERMITS["terrace_id"]) if "terrace_id" in PERMITS.columns else set()
 
 WEEKDAY_FMT = "%a %-d %b"   # e.g. "Mon 17 Jun"
-SHORT_FMT = "%-d %b"        # e.g. "17 Jun"
 
 
 def _fmt_date(d: date) -> str:
     return d.strftime(WEEKDAY_FMT)
-
-
-def _fmt_short(d: date) -> str:
-    return d.strftime(SHORT_FMT)
 
 
 # ---------------------------------------------------------------------------
@@ -101,19 +96,9 @@ h1,h2,h3,h4,h5,h6 { font-weight: 650; }
   font-weight:700; font-variant-numeric: tabular-nums; color:#3a2f00;
   background:#FFD166; border:1px solid rgba(0,0,0,.06);
 }
-.snap-note {
-  background:#FFF6DE; color:#8A5A00; border-left:3px solid #FFC107;
-  border-radius:8px; padding:.5rem .7rem; margin-top:.4rem; font-size:.92rem;
-}
-.snap-note.exact { background:transparent; color:var(--t-muted); border-left:3px solid #cdd3da; }
 .snap-chip {
   background:#FFF6DE; color:#8A5A00; border-radius:8px;
   padding:.1rem .5rem; font-size:.82rem; font-weight:600;
-}
-.hour-ticks {
-  display:flex; justify-content:space-between; color:var(--t-muted);
-  font-size:.78rem; font-variant-numeric: tabular-nums; margin-top:-.4rem;
-  letter-spacing:.5px;
 }
 .help-cap { color:var(--t-muted); font-size:.82rem; margin-top:.25rem; }
 .when-toolbar {
@@ -197,6 +182,7 @@ when_toolbar = ui.card(
                 max=date(2026, 12, 31),
                 format="M d",
                 startview="month",
+                weekstart=1,  # weeks start on Monday
                 width="100%",
             ),
             ui.div(
@@ -219,13 +205,9 @@ when_toolbar = ui.card(
                 ticks=False,
                 width="100%",
             ),
-            ui.div(
-                "8 · 10 · 12 · 14 · 16 · 18 · 20 · 22", class_="hour-ticks"
-            ),
         ),
         col_widths={"sm": (12, 12), "md": (4, 8)},
     ),
-    ui.output_ui("snap_note"),
     class_="when-toolbar",
 )
 
@@ -472,20 +454,6 @@ def server(input, output, session):
         n = int(df["in_sun"].sum())
         return ui.span(f"☀ {n} / {len(df)} in sun", class_="sun-pill")
 
-    @render.ui
-    def snap_note():
-        _, _, dt, was, req = snapped()
-        if was:
-            return ui.HTML(
-                f'<div class="snap-note"><i class="bi bi-brightness-alt-high"></i> '
-                f"Sun pattern from nearest sample <b>{_fmt_date(dt.date())}</b> "
-                f"(opening hours use your picked day, {_fmt_short(req)})</div>"
-            )
-        return ui.HTML(
-            '<div class="snap-note exact"><i class="bi bi-check-circle"></i> '
-            "Exact sample date.</div>"
-        )
-
     @render.text
     def map_snap_chip():
         _, minutes, dt, was, _ = snapped()
@@ -653,9 +621,10 @@ def server(input, output, session):
             theme=ui.value_box_theme(bg="#FFD166", fg="#3a2f00"),
         )
 
-        # Opening-hours line (with live open/closed status) + best sunny time.
-        open_now = bool(rec.get("open_now", True))
-        hours_text = _html.escape(str(rec.get("hours_text") or "hours unknown"))
+        # Opening-hours: live open/closed + today's hours, then the full week.
+        open_now = bool(rec.get("open_now", False))
+        today_hours = _html.escape(str(rec.get("today_hours") or "—"))
+        hours_text = _html.escape(str(rec.get("hours_text") or ""))
         status = (
             '<span class="open">● Open now</span>'
             if open_now
@@ -664,9 +633,16 @@ def server(input, output, session):
         meta = [
             ui.HTML(
                 f'<div class="hours-line"><i class="bi bi-clock"></i> '
-                f"{status} · {hours_text}</div>"
+                f"{status} · Today {today_hours}</div>"
             )
         ]
+        if hours_text:
+            meta.append(
+                ui.HTML(
+                    f'<div class="detail-meta"><i class="bi bi-calendar-week"></i> '
+                    f"{hours_text}</div>"
+                )
+            )
         if bh_hour is not None:
             meta.append(
                 ui.HTML(

@@ -36,11 +36,12 @@ def test_loaders_return_expected_shapes():
     terraces = D.load_terraces()
     assert len(terraces) == 43
     assert {"id", "name", "amenity", "lon", "lat"}.issubset(terraces.columns)
-    # Opening-hours columns are parsed.
-    assert {"opens_min", "closes_min", "closed_days_set", "hours_text"}.issubset(
-        terraces.columns
-    )
-    assert (terraces["opens_min"] >= 0).all()  # every bar has an opening time
+    # Opening-hours parsed into a per-weekday schedule.
+    assert {"week_hours", "hours_text"}.issubset(terraces.columns)
+    for wh in terraces["week_hours"]:
+        assert set(wh.keys()) == set(range(7))  # Mon..Sun present
+        for v in wh.values():
+            assert v is None or (len(v) == 2 and v[0] is not None)
 
     shadows = D.load_shadows()
     assert len(shadows) > 30000
@@ -126,19 +127,28 @@ def test_sun_hours_left_and_best_hour():
     assert 0.0 <= frac <= 1.0
 
 
-def test_opening_hours_parsing_and_is_open():
+def test_week_hours_and_is_open():
     D = _data()
     t = D.load_terraces().set_index("id")
-    # Brooke is closed Mondays per research.
-    brooke = t.loc["brooke"]
-    assert 0 in brooke["closed_days_set"]  # Mon == 0
-    mon = date(2026, 6, 15)  # a Monday
-    thu = date(2026, 6, 18)  # a Thursday
+    mon = date(2026, 6, 15)  # Monday
+    thu = date(2026, 6, 18)  # Thursday
     assert mon.weekday() == 0 and thu.weekday() == 3
-    dt_mon = D.make_datetime(mon, 18 * 60)
-    dt_thu = D.make_datetime(thu, 18 * 60)
-    assert D.is_open_at(brooke["opens_min"], brooke["closes_min"], brooke["closed_days_set"], dt_mon) is False
-    assert D.is_open_at(brooke["opens_min"], brooke["closes_min"], brooke["closed_days_set"], dt_thu) is True
+
+    # Brooke is closed Mondays, open Thursday evening.
+    brooke = t.loc["brooke"]["week_hours"]
+    assert brooke[0] is None  # Mon closed
+    assert D.is_open_at(brooke, D.make_datetime(mon, 18 * 60)) is False
+    assert D.is_open_at(brooke, D.make_datetime(thu, 18 * 60)) is True
+
+    # William K. Kurvi is closed every day (seasonal closure).
+    william = t.loc["william_k_kurvi"]["week_hours"]
+    assert all(william[d] is None for d in range(7))
+    for d in (mon, thu):
+        assert D.is_open_at(william, D.make_datetime(d, 18 * 60)) is False
+
+    # Day-hours formatting.
+    assert D.fmt_day_hours(None) == "Closed"
+    assert D.fmt_day_hours((16 * 60, 2 * 60)) == "16:00–02:00"
 
 
 def test_ranked_for_orders_by_open_sun_and_respects_closed_days():

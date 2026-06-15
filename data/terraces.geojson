@@ -9,10 +9,8 @@
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1856073,24.9463414",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 09–02",
-        "opens_min": 540,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[540,120],\"Tue\":[540,120],\"Wed\":[540,120],\"Thu\":[540,120],\"Fri\":[540,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -30,10 +28,8 @@
         "address": "Hämeentie 50, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1870486,24.9611381",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Sun–Tue 15–23, Wed–Thu 15–01, Fri–Sat 15–03:30",
-        "opens_min": 900,
-        "closes_min": 1380
+        "hours_json": "{\"Mon\":[900,1380],\"Tue\":[900,1380],\"Wed\":[900,60],\"Thu\":[900,60],\"Fri\":[900,210],\"Sat\":[900,210],\"Sun\":[900,1380]}"
       },
       "geometry": {
         "type": "Point",
@@ -51,10 +47,8 @@
         "address": "Fleminginkatu 13,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1860976,24.9534724",
         "amenity": "pub",
-        "closed_days": "Mon",
         "hours_text": "Tue–Thu & Sun 17–01, Fri–Sat 17–03, Mon closed",
-        "opens_min": 1020,
-        "closes_min": 60
+        "hours_json": "{\"Mon\":null,\"Tue\":[1020,60],\"Wed\":[1020,60],\"Thu\":[1020,60],\"Fri\":[1020,180],\"Sat\":[1020,180],\"Sun\":[1020,60]}"
       },
       "geometry": {
         "type": "Point",
@@ -72,10 +66,8 @@
         "address": "Viides linja 16, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1838739,24.951349",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 10:30–03",
-        "opens_min": 630,
-        "closes_min": 180
+        "hours_json": "{\"Mon\":[630,180],\"Tue\":[630,180],\"Wed\":[630,180],\"Thu\":[630,180],\"Fri\":[630,180],\"Sat\":[630,180],\"Sun\":[630,180]}"
       },
       "geometry": {
         "type": "Point",
@@ -93,10 +85,8 @@
         "address": "Toinen linja 23, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830793,24.9450873",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Approx daily ~15–24 (Foursquare popular times; no official posted hours)",
-        "opens_min": 900,
-        "closes_min": 0
+        "hours_json": "{\"Mon\":[900,1440],\"Tue\":[900,1440],\"Wed\":[900,1440],\"Thu\":[900,1440],\"Fri\":[900,1440],\"Sat\":[900,1440],\"Sun\":[900,1440]}"
       },
       "geometry": {
         "type": "Point",
@@ -114,10 +104,8 @@
         "address": "Hämeentie 2 B, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1803394,24.9506971",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Mon 11–24, Tue–Fri 11–02, Sat 12–02, Sun 11–16 (a street bar / theater restaurant)",
-        "opens_min": 660,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[660,1440],\"Tue\":[660,120],\"Wed\":[660,120],\"Thu\":[660,120],\"Fri\":[660,120],\"Sat\":[720,120],\"Sun\":[660,960]}"
       },
       "geometry": {
         "type": "Point",
@@ -135,10 +123,8 @@
         "address": "Helsinginkatu 2a,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1874796,24.961081",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 15–02",
-        "opens_min": 900,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[900,120],\"Sat\":[900,120],\"Sun\":[900,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -156,10 +142,8 @@
         "address": "Viides linja 4,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826029,24.9545637",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Thu 15–02, Fri 14–02, Sat–Sun 09–02",
-        "opens_min": 540,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[840,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -177,10 +161,8 @@
         "address": "Castréninkatu 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.184793,24.9466581",
         "amenity": "bar",
-        "closed_days": "Sun,Mon",
         "hours_text": "Tue–Thu 17–23, Fri–Sat 17–01:30, Sun–Mon closed",
-        "opens_min": 1020,
-        "closes_min": 90
+        "hours_json": "{\"Mon\":null,\"Tue\":[1020,1380],\"Wed\":[1020,1380],\"Thu\":[1020,1380],\"Fri\":[1020,90],\"Sat\":[1020,90],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -198,10 +180,8 @@
         "address": "Pitkänsillanranta 2,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1766085,24.9492464",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Fri 11/12–24, Sat 12–24, Sun 12–22 (restaurant boat)",
-        "opens_min": 660,
-        "closes_min": 0
+        "hours_json": "{\"Mon\":[660,0],\"Tue\":[660,0],\"Wed\":[660,0],\"Thu\":[660,0],\"Fri\":[660,0],\"Sat\":[720,1440],\"Sun\":[720,1320]}"
       },
       "geometry": {
         "type": "Point",
@@ -219,10 +199,8 @@
         "address": "Kaarlenkatu 3-5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1848357,24.9517632",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Daily 15–02 (Fri–Sat later, to ~04)",
-        "opens_min": 900,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[900,120],\"Sat\":[900,120],\"Sun\":[900,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -240,10 +218,8 @@
         "address": "Fleminginkatu 6, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849923,24.9527763",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Sun–Thu 15–02, Fri–Sat 15–05",
-        "opens_min": 900,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[900,300],\"Sat\":[900,300],\"Sun\":[900,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -261,10 +237,8 @@
         "address": "Viides linja 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830292,24.9543267",
         "amenity": "bar",
-        "closed_days": "Mon",
         "hours_text": "Tue–Thu 17–24, Fri–Sat 17–02, Sun 17–23, Mon closed",
-        "opens_min": 1020,
-        "closes_min": 1440
+        "hours_json": "{\"Mon\":null,\"Tue\":[1020,1440],\"Wed\":[1020,1440],\"Thu\":[1020,1440],\"Fri\":[1020,120],\"Sat\":[1020,120],\"Sun\":[1020,1380]}"
       },
       "geometry": {
         "type": "Point",
@@ -282,10 +256,8 @@
         "address": "Säästöpankinranta 6, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.178912,24.9472739",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Thu 10:30–23, Fri 10:30–01, Sat 12–01, Sun 14–21",
-        "opens_min": 630,
-        "closes_min": 1380
+        "hours_json": "{\"Mon\":[630,1380],\"Tue\":[630,1380],\"Wed\":[630,1380],\"Thu\":[630,1380],\"Fri\":[630,60],\"Sat\":[720,60],\"Sun\":[840,1260]}"
       },
       "geometry": {
         "type": "Point",
@@ -303,10 +275,8 @@
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1812246,24.9531387",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Mon–Fri 14–02, Sat–Sun 10–02",
-        "opens_min": 840,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[840,120],\"Tue\":[840,120],\"Wed\":[840,120],\"Thu\":[840,120],\"Fri\":[840,120],\"Sat\":[600,120],\"Sun\":[600,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -324,10 +294,8 @@
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1815265,24.9511895",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Fri 15–02, Sat–Sun 12–02",
-        "opens_min": 720,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[900,120],\"Sat\":[720,120],\"Sun\":[720,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -345,10 +313,8 @@
         "address": "Helsinginkatu 32, 00510 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862898,24.9465943",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon & Sun 16–24, Tue–Fri 16–02, Sat 14–02",
-        "opens_min": 960,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[960,1440],\"Tue\":[960,120],\"Wed\":[960,120],\"Thu\":[960,120],\"Fri\":[960,120],\"Sat\":[840,120],\"Sun\":[960,1440]}"
       },
       "geometry": {
         "type": "Point",
@@ -366,10 +332,8 @@
         "address": "Viides linja 8,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1830343,24.9535006",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 11–02",
-        "opens_min": 660,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[660,120],\"Tue\":[660,120],\"Wed\":[660,120],\"Thu\":[660,120],\"Fri\":[660,120],\"Sat\":[660,120],\"Sun\":[660,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -387,10 +351,8 @@
         "address": "Porthaninkatu 9, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1828064,24.95277",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 12–02",
-        "opens_min": 720,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[720,120],\"Tue\":[720,120],\"Wed\":[720,120],\"Thu\":[720,120],\"Fri\":[720,120],\"Sat\":[720,120],\"Sun\":[720,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -408,10 +370,8 @@
         "address": "Neljäs linja 2, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1816369,24.9539999",
         "amenity": "bar",
-        "closed_days": "Sun",
         "hours_text": "Mon–Tue 17–02, Wed–Sat 17–05, Sun closed",
-        "opens_min": 1020,
-        "closes_min": 300
+        "hours_json": "{\"Mon\":[1020,120],\"Tue\":[1020,120],\"Wed\":[1020,300],\"Thu\":[1020,300],\"Fri\":[1020,300],\"Sat\":[1020,300],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -429,10 +389,8 @@
         "address": "Toinen linja 15, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1823697,24.9468228",
         "amenity": "pub",
-        "closed_days": "Mon",
         "hours_text": "Tue & Sun 17–24, Wed–Sat 17–02, Mon closed",
-        "opens_min": 1020,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":[1020,1440],\"Wed\":[1020,120],\"Thu\":[1020,120],\"Fri\":[1020,120],\"Sat\":[1020,120],\"Sun\":[1020,1440]}"
       },
       "geometry": {
         "type": "Point",
@@ -450,10 +408,8 @@
         "address": "Porthaninkatu 5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1818092,24.9512706",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Thu 10:30–16/23, Fri 10:30–02, Sat 10–02, Sun 10–17 (bar to 02 weekends)",
-        "opens_min": 600,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[630,960],\"Tue\":[630,960],\"Wed\":[630,960],\"Thu\":[630,960],\"Fri\":[630,120],\"Sat\":[600,120],\"Sun\":[600,1020]}"
       },
       "geometry": {
         "type": "Point",
@@ -471,10 +427,8 @@
         "address": "Toinen linja 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1814269,24.9492686",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Mon–Tue 14–01, Wed–Thu 14–02, Fri–Sat 12–02, Sun 14–24",
-        "opens_min": 720,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[840,60],\"Tue\":[840,60],\"Wed\":[840,120],\"Thu\":[840,120],\"Fri\":[720,120],\"Sat\":[720,120],\"Sun\":[840,1440]}"
       },
       "geometry": {
         "type": "Point",
@@ -492,10 +446,8 @@
         "address": "Siltasaarenkatu 15, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1826161,24.9497277",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily from 09:00, closes ~02:00 (Sun earlier ~24:00)",
-        "opens_min": 540,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[540,120],\"Tue\":[540,120],\"Wed\":[540,120],\"Thu\":[540,120],\"Fri\":[540,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -513,10 +465,8 @@
         "address": "Wallininkatu 10,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849601,24.9431072",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 10–02",
-        "opens_min": 600,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[600,120],\"Tue\":[600,120],\"Wed\":[600,120],\"Thu\":[600,120],\"Fri\":[600,120],\"Sat\":[600,120],\"Sun\":[600,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -534,10 +484,8 @@
         "address": "Porthaninkatu 10, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1831699,24.952773",
         "amenity": "pub",
-        "closed_days": "Sun,Mon",
         "hours_text": "Tue–Sat 17–02, Sun–Mon closed",
-        "opens_min": 1020,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":[1020,120],\"Wed\":[1020,120],\"Thu\":[1020,120],\"Fri\":[1020,120],\"Sat\":[1020,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -555,10 +503,8 @@
         "address": "Helsinginkatu 20, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1867726,24.9517696",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Sun–Thu 10–24, Fri–Sat 10–02",
-        "opens_min": 600,
-        "closes_min": 1440
+        "hours_json": "{\"Mon\":[600,1440],\"Tue\":[600,1440],\"Wed\":[600,1440],\"Thu\":[600,1440],\"Fri\":[600,120],\"Sat\":[600,120],\"Sun\":[600,1440]}"
       },
       "geometry": {
         "type": "Point",
@@ -576,10 +522,8 @@
         "address": "Hämeentie 30,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1836906,24.9585671",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Daily 15–02",
-        "opens_min": 900,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[900,120],\"Tue\":[900,120],\"Wed\":[900,120],\"Thu\":[900,120],\"Fri\":[900,120],\"Sat\":[900,120],\"Sun\":[900,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -597,10 +541,8 @@
         "address": "Toinen linja 2, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1808412,24.9500102",
         "amenity": "bar",
-        "closed_days": "Sun",
         "hours_text": "Mon–Sat 11–02, Sun closed",
-        "opens_min": 660,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[660,120],\"Tue\":[660,120],\"Wed\":[660,120],\"Thu\":[660,120],\"Fri\":[660,120],\"Sat\":[660,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -618,10 +560,8 @@
         "address": "Castréninkatu 7, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1849314,24.9468794",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 09–02",
-        "opens_min": 540,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[540,120],\"Tue\":[540,120],\"Wed\":[540,120],\"Thu\":[540,120],\"Fri\":[540,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -639,10 +579,8 @@
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1834848,24.9468123",
         "amenity": "pub",
-        "closed_days": "Mon,Tue,Wed,Thu,Sun",
         "hours_text": "Fri–Sat 16–02; closed Mon–Thu & Sun",
-        "opens_min": 960,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":null,\"Wed\":null,\"Thu\":null,\"Fri\":[960,120],\"Sat\":[960,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -660,10 +598,8 @@
         "address": "Fleminginkatu 5, 00530 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1843808,24.9533486",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 12–02",
-        "opens_min": 720,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[720,120],\"Tue\":[720,120],\"Wed\":[720,120],\"Thu\":[720,120],\"Fri\":[720,120],\"Sat\":[720,120],\"Sun\":[720,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -681,10 +617,8 @@
         "address": "Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1811619,24.9529671",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Sun–Thu 12–04:30, Fri–Sat 12–05",
-        "opens_min": 720,
-        "closes_min": 270
+        "hours_json": "{\"Mon\":[720,270],\"Tue\":[720,270],\"Wed\":[720,270],\"Thu\":[720,270],\"Fri\":[720,300],\"Sat\":[720,300],\"Sun\":[720,270]}"
       },
       "geometry": {
         "type": "Point",
@@ -702,10 +636,8 @@
         "address": "Fleminginkatu 13, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1862837,24.9534519",
         "amenity": "pub",
-        "closed_days": "Mon,Sun",
         "hours_text": "Tue–Thu 18–01, Fri–Sat 17–02; closed Mon & Sun",
-        "opens_min": 1020,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":[1080,60],\"Wed\":[1080,60],\"Thu\":[1080,60],\"Fri\":[1020,120],\"Sat\":[1020,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -723,10 +655,8 @@
         "address": "Kaarlenkatu 10,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1861223,24.9512452",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily 16–04:30",
-        "opens_min": 960,
-        "closes_min": 270
+        "hours_json": "{\"Mon\":[960,270],\"Tue\":[960,270],\"Wed\":[960,270],\"Thu\":[960,270],\"Fri\":[960,270],\"Sat\":[960,270],\"Sun\":[960,270]}"
       },
       "geometry": {
         "type": "Point",
@@ -744,10 +674,8 @@
         "address": "Helsinginkatu 2a,  Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.187448,24.9613184",
         "amenity": "bar",
-        "closed_days": "Mon,Sun",
         "hours_text": "Tue–Thu 16–24, Fri–Sat 16–02, Mon & Sun closed (note: closed for summer season)",
-        "opens_min": 960,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":null,\"Wed\":null,\"Thu\":null,\"Fri\":null,\"Sat\":null,\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -765,10 +693,8 @@
         "address": "Vaasankatu 29, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1884879,24.9534615",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Mon–Thu & Sun 16–02, Fri–Sat 14–03",
-        "opens_min": 960,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[960,120],\"Tue\":[960,120],\"Wed\":[960,120],\"Thu\":[960,120],\"Fri\":[840,180],\"Sat\":[840,180],\"Sun\":[960,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -786,10 +712,8 @@
         "address": "Aleksis Kiven katu 14, 00510 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1891818,24.9574519",
         "amenity": "pub",
-        "closed_days": "Mon,Tue,Sun",
         "hours_text": "Wed–Sat 16–02, Mon–Tue & Sun closed",
-        "opens_min": 960,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":null,\"Wed\":[960,120],\"Thu\":[960,120],\"Fri\":[960,120],\"Sat\":[960,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -807,10 +731,8 @@
         "address": "Vaasankatu 12, 00500 Helsinki, Finland",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1882177,24.9566059",
         "amenity": "pub",
-        "closed_days": "",
         "hours_text": "Daily ~09–02 (early-opening Kallio dive bar)",
-        "opens_min": 540,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":[540,120],\"Tue\":[540,120],\"Wed\":[540,120],\"Thu\":[540,120],\"Fri\":[540,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
       },
       "geometry": {
         "type": "Point",
@@ -828,10 +750,8 @@
         "address": "Castréninkatu 3, 00530 Helsinki",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1840577,24.9454935",
         "amenity": "bar",
-        "closed_days": "Mon,Sun",
         "hours_text": "Tue–Thu 18–24, Fri–Sat 18–02, Mon & Sun closed",
-        "opens_min": 1080,
-        "closes_min": 120
+        "hours_json": "{\"Mon\":null,\"Tue\":[1080,1440],\"Wed\":[1080,1440],\"Thu\":[1080,1440],\"Fri\":[1080,120],\"Sat\":[1080,120],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -849,10 +769,8 @@
         "address": "Hakaniemen torikatu (Hakaniementori), 00530 Helsinki",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1793876,24.9514842",
         "amenity": "bar",
-        "closed_days": "",
         "hours_text": "Daily 11–23 (summer kiosk at Hakaniementori; weekends may open 09)",
-        "opens_min": 660,
-        "closes_min": 1380
+        "hours_json": "{\"Mon\":[660,1380],\"Tue\":[660,1380],\"Wed\":[660,1380],\"Thu\":[660,1380],\"Fri\":[660,1380],\"Sat\":[660,1380],\"Sun\":[660,1380]}"
       },
       "geometry": {
         "type": "Point",
@@ -870,10 +788,8 @@
         "address": "Vaasankatu 11, 00500 Helsinki",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1884594,24.9585096",
         "amenity": "restaurant",
-        "closed_days": "Sun",
         "hours_text": "Mon–Fri 12–22, Sat 10–22, Sun closed",
-        "opens_min": 720,
-        "closes_min": 1320
+        "hours_json": "{\"Mon\":[720,1320],\"Tue\":[720,1320],\"Wed\":[720,1320],\"Thu\":[720,1320],\"Fri\":[720,1320],\"Sat\":[600,1320],\"Sun\":null}"
       },
       "geometry": {
         "type": "Point",
@@ -891,10 +807,8 @@
         "address": "Agricolankatu 9, 00530 Helsinki",
         "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1843942,24.9536288",
         "amenity": "bakery",
-        "closed_days": "",
         "hours_text": "Mon–Fri 8–19, Sat 9–19, Sun 9–16",
-        "opens_min": 480,
-        "closes_min": 1140
+        "hours_json": "{\"Mon\":[480,1140],\"Tue\":[480,1140],\"Wed\":[480,1140],\"Thu\":[480,1140],\"Fri\":[480,1140],\"Sat\":[540,1140],\"Sun\":[540,960]}"
       },
       "geometry": {
         "type": "Point",

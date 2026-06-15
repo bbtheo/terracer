@@ -6,6 +6,7 @@ server. All data paths resolve relative to this file (robust to the cwd).
 
 from __future__ import annotations
 
+import json
 import math
 import warnings
 from datetime import date, datetime, time
@@ -29,8 +30,7 @@ SLOT_MINUTES = tuple(range(SLOT_START_MIN, SLOT_END_MIN + 1, SLOT_STEP_MIN))  # 
 SLOT_HOURS = SLOT_STEP_MIN / 60.0  # 0.5 h represented by each lit slot
 HOURS = tuple(range(8, 24))  # whole clock hours the grid spans (axis labels)
 
-_WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-_WEEKDAY_IDX = {name: i for i, name in enumerate(_WEEKDAYS)}  # Mon=0 .. Sun=6
+_WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")  # index = Mon=0..Sun=6
 
 # Cluster centroid (verified): lon 24.9515 / lat 60.1836.
 CENTER_LON = 24.9515
@@ -68,9 +68,9 @@ _DARK_SHADE_END = (0x51, 0x5A, 0x6B)
 def load_terraces() -> gpd.GeoDataFrame:
     """All terraces with lon/lat + parsed opening-hours columns (EPSG:4326).
 
-    Opening-hours columns: opens_min/closes_min (minutes from midnight, -1 if
-    unknown), closed_days_set (frozenset of weekday indices Mon=0..Sun=6),
-    hours_text (human-readable schedule).
+    Opening-hours columns: week_hours (dict {weekday Mon=0..Sun=6: (open_min,
+    close_min) or None}) parsed from the `hours_json` property, and hours_text
+    (human-readable weekly schedule).
     """
     gdf = gpd.read_file(DATA_DIR / "terraces.geojson")
     if gdf.crs is None:
@@ -81,13 +81,9 @@ def load_terraces() -> gpd.GeoDataFrame:
     gdf["lon"] = gdf.geometry.x
     gdf["lat"] = gdf.geometry.y
 
-    gdf["opens_min"] = gdf.get("opens_min", -1)
-    gdf["opens_min"] = pd.to_numeric(gdf["opens_min"], errors="coerce").fillna(-1).astype(int)
-    gdf["closes_min"] = gdf.get("closes_min", -1)
-    gdf["closes_min"] = pd.to_numeric(gdf["closes_min"], errors="coerce").fillna(-1).astype(int)
-    gdf["hours_text"] = gdf.get("hours_text", "").fillna("")
-    raw_closed = gdf.get("closed_days", "")
-    gdf["closed_days_set"] = raw_closed.fillna("").apply(_parse_closed_days)
+    gdf["hours_text"] = gdf["hours_text"].fillna("") if "hours_text" in gdf else ""
+    raw = gdf["hours_json"] if "hours_json" in gdf else pd.Series([""] * len(gdf))
+    gdf["week_hours"] = raw.fillna("").apply(_parse_week_hours)
     return gdf
 
 
@@ -194,15 +190,37 @@ def make_datetime(d: date, minutes: int) -> datetime:
 # ---------------------------------------------------------------------------
 # Time / opening-hours helpers
 # ---------------------------------------------------------------------------
-def _parse_closed_days(value) -> frozenset:
-    """'Mon,Sun' -> frozenset({0, 6}); empty -> empty set."""
+def _parse_week_hours(value) -> dict:
+    """JSON string {"Mon": [open_min, close_min] or null, ...} ->
+    {weekday_idx: (open_min, close_min) or None}. Missing/invalid -> all None."""
+    out = {i: None for i in range(7)}
     if not value or not isinstance(value, str):
-        return frozenset()
-    return frozenset(
-        _WEEKDAY_IDX[token.strip()]
-        for token in value.split(",")
-        if token.strip() in _WEEKDAY_IDX
-    )
+        return out
+    try:
+        data = json.loads(value)
+    except (ValueError, TypeError):
+        return out
+    for i, day in enumerate(_WEEKDAYS):
+        v = data.get(day)
+        if isinstance(v, (list, tuple)) and len(v) == 2 and v[0] is not None:
+            close = int(v[1]) if v[1] is not None else None
+            out[i] = (int(v[0]), close)
+    return out
+
+
+def day_hours(week_hours, weekday: int):
+    """(open_min, close_min) for the given weekday, or None if closed/unknown."""
+    if not week_hours:
+        return None
+    return week_hours.get(int(weekday))
+
+
+def fmt_day_hours(hours) -> str:
+    """(open_min, close_min) -> '16:00–02:00'; None -> 'Closed'."""
+    if not hours or hours[0] is None:
+        return "Closed"
+    o, c = hours
+    return f"{fmt_minutes(o)}–{fmt_minutes(c if c is not None else o)}"
 
 
 def fmt_minutes(minutes: int) -> str:
@@ -233,14 +251,14 @@ def _effective_close(opens_min: int, closes_min: int) -> int:
     return closes_min
 
 
-def is_open_at(opens_min: int, closes_min: int, closed_days_set, dt: datetime) -> bool:
-    """Whether a venue is open at datetime `dt` given its parsed hours."""
-    if int(opens_min) < 0:
-        return True  # unknown hours -> assume open
-    if dt.weekday() in (closed_days_set or frozenset()):
+def is_open_at(week_hours, dt: datetime) -> bool:
+    """Whether a venue is open at datetime `dt` given its per-weekday schedule."""
+    hrs = day_hours(week_hours, dt.weekday())
+    if hrs is None or hrs[0] is None:
         return False
+    o, c = hrs
     minutes = dt.hour * 60 + dt.minute
-    return int(opens_min) <= minutes < _effective_close(int(opens_min), int(closes_min))
+    return o <= minutes < _effective_close(o, c)
 
 
 # ---------------------------------------------------------------------------
@@ -400,21 +418,19 @@ def open_sun_left_table(
     sub = sub[sub["in_sun"]].copy()
     sub["minutes"] = sub["datetime"].dt.hour * 60 + sub["datetime"].dt.minute
     sub = sub[sub["minutes"] >= int(from_minutes)]
-    info = terraces[["id", "opens_min", "closes_min", "closed_days_set"]].rename(
-        columns={"id": "terrace_id"}
-    )
-    info["terrace_id"] = info["terrace_id"].astype(str)
-    m = sub.merge(info, on="terrace_id", how="left")
+    # Resolve each terrace's open/close for the requested weekday.
+    info = terraces[["id", "week_hours"]].copy()
+    info["terrace_id"] = info["id"].astype(str)
+    today = info["week_hours"].apply(lambda wh: day_hours(wh, weekday))
+    info["t_open"] = [h[0] if (h and h[0] is not None) else None for h in today]
+    info["t_close"] = [h[1] if (h and h[0] is not None) else None for h in today]
+    m = sub.merge(info[["terrace_id", "t_open", "t_close"]], on="terrace_id", how="left")
     if len(m):
-        opens = m["opens_min"].fillna(-1).astype(int)
-        closes = m["closes_min"].fillna(-1).astype(int)
-        eff_close = closes.where((closes > opens) & (closes >= 0), 24 * 60)
-        open_known = opens >= 0
-        time_ok = (~open_known) | ((m["minutes"] >= opens) & (m["minutes"] < eff_close))
-        not_closed = ~m["closed_days_set"].apply(
-            lambda s: weekday in s if isinstance(s, frozenset) else False
-        )
-        counts = m[time_ok & not_closed].groupby("terrace_id").size()
+        o = pd.to_numeric(m["t_open"], errors="coerce")
+        c = pd.to_numeric(m["t_close"], errors="coerce")
+        eff_close = c.where(c.notna() & (c > o), 24 * 60)
+        keep = o.notna() & (m["minutes"] >= o) & (m["minutes"] < eff_close)
+        counts = m[keep].groupby("terrace_id").size()
     else:
         counts = pd.Series(dtype=int)
     return counts.reindex(ids.values, fill_value=0).astype(int)
@@ -431,32 +447,30 @@ def ranked_for(
 
     Sun comes from `sun_date` (nearest sampled date); opening hours use
     `req_date` (the date the user actually picked, default = sun_date). Adds:
-      osl_slots  - remaining open+sunny half-hour slots from from_minutes
-      osl_hours  - that as hours (0.5 each)
-      open_now   - whether the bar is open at the requested date + selected time
-      hours_text / opens_min / closes_min / closed_days_set - for display
+      osl_slots   - remaining open+sunny half-hour slots from from_minutes
+      osl_hours   - that as hours (0.5 each)
+      open_now    - whether the bar is open at the requested date + selected time
+      today_hours - "HH:MM–HH:MM" / "Closed" for the requested weekday
+      hours_text  - full weekly schedule (display)
     Sort: osl_slots desc, then current sun_fraction desc, then name.
     """
     if req_date is None:
         req_date = sun_date
+    wd = req_date.weekday()
     dt_sun = make_datetime(sun_date, from_minutes)
     dt_open = make_datetime(req_date, from_minutes)
     snap = snapshot_for(shadows, terraces, dt_sun)
-    osl = open_sun_left_table(
-        shadows, terraces, sun_date, from_minutes, req_date.weekday()
+    osl = open_sun_left_table(shadows, terraces, sun_date, from_minutes, wd)
+    meta = terraces[["id", "week_hours", "hours_text"]].rename(
+        columns={"id": "terrace_id"}
     )
-    meta = terraces[
-        ["id", "opens_min", "closes_min", "closed_days_set", "hours_text"]
-    ].rename(columns={"id": "terrace_id"})
     meta["terrace_id"] = meta["terrace_id"].astype(str)
     out = snap.merge(meta, on="terrace_id", how="left")
     out["osl_slots"] = out["terrace_id"].map(osl).fillna(0).astype(int)
     out["osl_hours"] = out["osl_slots"] * SLOT_HOURS
-    out["open_now"] = out.apply(
-        lambda r: is_open_at(
-            r["opens_min"], r["closes_min"], r["closed_days_set"], dt_open
-        ),
-        axis=1,
+    out["open_now"] = out["week_hours"].apply(lambda wh: is_open_at(wh, dt_open))
+    out["today_hours"] = out["week_hours"].apply(
+        lambda wh: fmt_day_hours(day_hours(wh, wd))
     )
     out = out.sort_values(
         ["osl_slots", "sun_fraction", "name"], ascending=[False, False, True]
