@@ -179,6 +179,23 @@ h1,h2,h3,h4,h5,h6 { font-weight: 650; }
 @media (max-width: 767.98px) {
   .when-toolbar .row > [class*="col"] { margin-bottom:.2rem; }
 }
+/* Full-screen cards: make the content (iframe or data grid) fill the available height. */
+.bslib-card[data-full-screen="true"] > .card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+.bslib-card[data-full-screen="true"] > .card-body > .shiny-html-output {
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.bslib-card[data-full-screen="true"] .map-iframe-wrap {
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
 """
 
 
@@ -347,8 +364,9 @@ def _grid_df(ranked):
 def _embed_iframe(deck_html: str, height: str) -> ui.HTML:
     escaped = _html.escape(deck_html)
     return ui.HTML(
-        f'<iframe srcdoc="{escaped}" '
-        f'style="width:100%;height:{height};border:none;border-radius:.5rem;"></iframe>'
+        f'<div class="map-iframe-wrap" style="height:{height};border-radius:.5rem;overflow:hidden;">'
+        f'<iframe srcdoc="{escaped}" style="width:100%;height:100%;border:none;display:block;"></iframe>'
+        f'</div>'
     )
 
 
@@ -489,7 +507,7 @@ def server(input, output, session):
         return render.DataGrid(
             df,
             selection_mode="row",
-            height="540px",
+            height=None,
             width="100%",
             styles=style_fn,
         )
