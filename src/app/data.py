@@ -165,6 +165,59 @@ def load_permit_polygons() -> gpd.GeoDataFrame:
     return gdf
 
 
+@lru_cache(maxsize=1)
+def load_terrace_points() -> pd.DataFrame:
+    """Per-terrace sample-point geometry (terrace_id, point_idx, lon, lat) used
+    to draw the terrace sun-map. Empty-safe if the parquet is absent."""
+    path = DATA_DIR / "shadows" / "terrace_points.parquet"
+    if not path.exists():
+        return pd.DataFrame(columns=["terrace_id", "point_idx", "lon", "lat"])
+    df = pd.read_parquet(path)
+    df["terrace_id"] = df["terrace_id"].astype(str)
+    return df
+
+
+@lru_cache(maxsize=1)
+def load_point_shadows() -> pd.DataFrame:
+    """Per-point sun (terrace_id, datetime tz-aware, point_idx, in_sun) for the
+    terrace sun-map. Empty-safe if the parquet is absent."""
+    path = DATA_DIR / "shadows" / "point_shadows.parquet"
+    if not path.exists():
+        return pd.DataFrame(columns=["terrace_id", "datetime", "point_idx", "in_sun"])
+    df = pd.read_parquet(path)
+    df["datetime"] = pd.to_datetime(df["datetime"])
+    if df["datetime"].dt.tz is None:
+        df["datetime"] = df["datetime"].dt.tz_localize(HELSINKI_TZ)
+    else:
+        df["datetime"] = df["datetime"].dt.tz_convert(HELSINKI_TZ)
+    df["terrace_id"] = df["terrace_id"].astype(str)
+    df["in_sun"] = df["in_sun"].astype(bool)
+    return df
+
+
+def sun_map_points(
+    point_shadows: pd.DataFrame,
+    terrace_points: pd.DataFrame,
+    terrace_id: str,
+    dt: datetime,
+) -> pd.DataFrame:
+    """Sample points (lon, lat, in_sun) for one terrace at datetime `dt`.
+
+    Joins the point geometry to the per-point sun at `dt`. Missing -> shade.
+    Empty DataFrame if the terrace has no mapped points.
+    """
+    pts = terrace_points[terrace_points["terrace_id"] == str(terrace_id)]
+    if pts.empty:
+        return pd.DataFrame(columns=["point_idx", "lon", "lat", "in_sun"])
+    ps = point_shadows[
+        (point_shadows["terrace_id"] == str(terrace_id))
+        & (point_shadows["datetime"] == dt)
+    ][["point_idx", "in_sun"]]
+    out = pts.merge(ps, on="point_idx", how="left")
+    out["in_sun"] = out["in_sun"].fillna(False).astype(bool)
+    return out[["point_idx", "lon", "lat", "in_sun"]].reset_index(drop=True)
+
+
 # ---------------------------------------------------------------------------
 # Date / time grid helpers
 # ---------------------------------------------------------------------------
@@ -633,16 +686,15 @@ def build_deck_html(
 
     layers = []
 
-    # 1. Building context (recedes into the background).
+    # 1. Building context — flat footprints (top-down view, no 3D extrusion).
     if buildings:
-        fill = [60, 56, 48, 120] if is_dark else [210, 205, 196, 90]
+        fill = [70, 66, 58, 150] if is_dark else [206, 200, 190, 130]
         layers.append(
             pdk.Layer(
                 "PolygonLayer",
                 data=buildings,
                 get_polygon="polygon",
-                get_elevation="elevation",
-                extruded=True,
+                extruded=False,
                 wireframe=False,
                 get_fill_color=fill,
                 pickable=False,
@@ -723,7 +775,7 @@ def build_deck_html(
         latitude=CENTER_LAT,
         longitude=CENTER_LON,
         zoom=zoom,
-        pitch=40,
+        pitch=0,  # straight top-down
         bearing=0,
     )
 

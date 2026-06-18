@@ -71,6 +71,45 @@ def _load_buildings(path: pathlib.Path) -> gpd.GeoDataFrame:
     return gpd.read_parquet(path)
 
 
+def _street_cluster(
+    mesh,
+    origin: np.ndarray,
+    terrain: bool,
+    half: float = 2.5,
+    step: float = 1.6,
+    tol: float = 1.2,
+    max_points: int = 10,
+) -> np.ndarray:
+    """A small cluster of street-level ray origins around a relocated bar point.
+
+    Single-point bars have no terrace geometry, so to draw a per-point sun map we
+    approximate the terrace as a patch of sidewalk: sample a grid around the
+    relocated street origin and keep points whose ground sits at the same street
+    level (rejecting ones that fall onto a building). Returns (n, 3) ray origins
+    `origin_height` (1.5 m) above ground; falls back to the single origin.
+    """
+    ox, oy, oz = float(origin[0]), float(origin[1]), float(origin[2])
+    ground0 = oz - 1.5
+    xs = np.arange(ox - half, ox + half + 1e-6, step)
+    ys = np.arange(oy - half, oy + half + 1e-6, step)
+    cand = [(float(x), float(y)) for x in xs for y in ys]
+    if terrain:
+        heights = sample_ground_heights(mesh, cand, probe_radii=(0.0,))
+    else:
+        heights = np.zeros(len(cand))
+    pts = []
+    for (x, y), gz in zip(cand, heights):
+        if terrain and abs(float(gz) - ground0) > tol:
+            continue  # not street level (roof / different level) -> skip
+        pts.append((x, y, (float(gz) if terrain else 0.0) + 1.5))
+    if not pts:
+        return np.array([[ox, oy, oz]], dtype=float)
+    if len(pts) > max_points:
+        keep = np.linspace(0, len(pts) - 1, max_points).round().astype(int)
+        pts = [pts[i] for i in keep]
+    return np.array(pts, dtype=float)
+
+
 def _validate_sun(latitude: float, longitude: float) -> None:
     midsummer = datetime(2026, 6, 21, 12, 0, tzinfo=HELSINKI_TZ)
     midwinter = datetime(2026, 12, 21, 12, 0, tzinfo=HELSINKI_TZ)
@@ -221,8 +260,9 @@ def main() -> int:
         return 1
 
     # Build ray origins. Terraces with a real permit polygon are sampled on a
-    # grid across the polygon (origins at street level + 1.5 m). The rest use
-    # the single POI point, relocated out of the building footprint if needed.
+    # dense grid across the polygon; single-point bars approximate the terrace
+    # with a street-level cluster around the relocated point. Both yield several
+    # per-point origins so a per-point sun map can show which parts are lit.
     polygon_origins: list[np.ndarray | None] = []
     fallback_indices = []
     for index, (terrace_id, point) in enumerate(zip(terrace_ids, terrace_points)):
@@ -231,7 +271,7 @@ def main() -> int:
             polygon_origins.append(None)
             fallback_indices.append(index)
             continue
-        samples = sample_polygon_points(polygon)
+        samples = sample_polygon_points(polygon, spacing=1.4, max_points=20)
         if mesh_includes_terrain:
             ground = sample_ground_heights(mesh, samples, probe_radii=(0.0, 3.0))
         else:
@@ -240,31 +280,37 @@ def main() -> int:
             np.array([[x, y, z + 1.5] for (x, y), z in zip(samples, ground)])
         )
 
-    fallback_origins = estimate_terrace_origins(
+    relocated = estimate_terrace_origins(
         mesh,
         [terrace_points[i] for i in fallback_indices],
         terrain=mesh_includes_terrain,
     )
+    fallback_clusters = [
+        _street_cluster(mesh, origin, mesh_includes_terrain) for origin in relocated
+    ]
 
     origin_rows: list[np.ndarray] = []
     origin_terrace = []
+    point_idx_rows = []
     fallback_cursor = 0
     for index in range(len(terrace_ids)):
         if polygon_origins[index] is not None:
             block = polygon_origins[index]
         else:
-            block = fallback_origins[fallback_cursor : fallback_cursor + 1]
+            block = fallback_clusters[fallback_cursor]
             fallback_cursor += 1
         origin_rows.append(block)
         origin_terrace.extend([index] * len(block))
+        point_idx_rows.append(np.arange(len(block)))
 
     origins = np.vstack(origin_rows)
     origin_terrace = np.asarray(origin_terrace)
+    point_idx = np.concatenate(point_idx_rows)
     sample_counts = np.bincount(origin_terrace, minlength=len(terrace_ids))
     print(
-        f"{len(polygons_by_id)} terraces use permit polygons "
-        f"({int(sample_counts[sample_counts > 1].sum())} sampled points), "
-        f"{len(fallback_indices)} use single-point fallback"
+        f"{len(polygons_by_id)} terraces use permit polygons, "
+        f"{len(fallback_indices)} use street-cluster fallback; "
+        f"{len(origins)} sample points total"
     )
 
     start_date = datetime.fromisoformat(args.start_date).date()
@@ -278,17 +324,20 @@ def main() -> int:
         tz=HELSINKI_TZ,
     )
 
+    n_dt, n_or = len(datetimes), len(origins)
+    sun_matrix = np.zeros((n_dt, n_or), dtype=bool)  # per-datetime, per-point
     records = []
-    for current in datetimes:
+    for di, current in enumerate(datetimes):
         position = sun_position(args.latitude, args.longitude, current)
         if position.altitude_deg <= 0:
-            fraction = np.zeros(len(terrace_ids), dtype=float)
+            sunny = np.zeros(n_or, dtype=bool)
         else:
-            sunny = origins_in_sun(mesh, origins, position.direction)
-            fraction = (
-                np.bincount(origin_terrace, weights=sunny, minlength=len(terrace_ids))
-                / sample_counts
-            )
+            sunny = origins_in_sun(mesh, origins, position.direction).astype(bool)
+        sun_matrix[di] = sunny
+        fraction = (
+            np.bincount(origin_terrace, weights=sunny, minlength=len(terrace_ids))
+            / sample_counts
+        )
         for terrace_id, value in zip(terrace_ids, fraction, strict=True):
             records.append(
                 {
@@ -302,6 +351,35 @@ def main() -> int:
     table = pd.DataFrame.from_records(records)
     table.to_parquet(output_path, index=False)
     print(f"Wrote {len(table)} rows to {output_path}")
+
+    # --- Per-point outputs for the terrace sun-map infographic ---
+    out_dir = output_path.parent
+    lonlat = gpd.GeoSeries(
+        gpd.points_from_xy(origins[:, 0], origins[:, 1]), crs=terraces_local.crs
+    ).to_crs("EPSG:4326")
+    origin_terrace_ids = np.array([terrace_ids[t] for t in origin_terrace])
+    points_df = pd.DataFrame(
+        {
+            "terrace_id": origin_terrace_ids,
+            "point_idx": point_idx,
+            "lon": lonlat.x.to_numpy(),
+            "lat": lonlat.y.to_numpy(),
+        }
+    )
+    points_df.to_parquet(out_dir / "terrace_points.parquet", index=False)
+
+    point_sun = pd.DataFrame(
+        {
+            "terrace_id": np.tile(origin_terrace_ids, n_dt),
+            "datetime": np.repeat(datetimes, n_or),
+            "point_idx": np.tile(point_idx, n_dt),
+            "in_sun": sun_matrix.reshape(-1),
+        }
+    )
+    point_sun.to_parquet(out_dir / "point_shadows.parquet", index=False)
+    print(
+        f"Wrote {len(points_df)} sample points and {len(point_sun)} point-sun rows"
+    )
     return 0
 
 

@@ -18,6 +18,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless backend — must precede pyplot import.
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 
 from shiny import App, reactive, render, ui  # noqa: E402
 
@@ -33,6 +34,8 @@ TERRACES = D.load_terraces()
 SHADOWS = D.load_shadows()
 BUILDINGS = D.load_buildings_clipped()
 PERMITS = D.load_permit_polygons()
+TERRACE_POINTS = D.load_terrace_points()
+POINT_SHADOWS = D.load_point_shadows()
 DEFAULT_DATE = D.default_date()
 PERMIT_IDS = set(PERMITS["terrace_id"]) if "terrace_id" in PERMITS.columns else set()
 
@@ -679,10 +682,104 @@ def server(input, output, session):
             ui.layout_columns(
                 d1, d2, d3, col_widths={"xs": (12, 12, 12), "sm": (4, 4, 4)}
             ),
+            ui.div(
+                ui.HTML(
+                    '<i class="bi bi-sun"></i> <b>Sun on the terrace now</b> — '
+                    "top-down, north up; orange = sun, grey = shade"
+                ),
+                class_="help-cap",
+                style="margin-top:.6rem;",
+            ),
+            ui.div(ui.output_plot("sun_map", height="190px")),
             ui.div(ui.output_plot("day_timeline", height="100px"), style="margin-top:.5rem;"),
-            ui.div("Cool grey = shade · warm orange = full sun", class_="help-cap"),
+            ui.div("Sun across the day · ▾ marks the selected time", class_="help-cap"),
             *meta,
         )
+
+    # ---------------- Terrace sun-map (which parts are lit) ----------------
+    @render.plot
+    def sun_map():
+        ctx = detail_ctx()
+        sid = ctx["id"]
+        dt = ctx["dt"]
+        dark = is_dark()
+        muted = "#9A8F7C" if dark else "#8A7E6E"
+        sun_rgb = (0.98, 0.52, 0.0)
+        shade_rgb = (0.34, 0.38, 0.45) if dark else (0.55, 0.58, 0.63)
+        shade_pt = "#8A93A0" if dark else "#6B7280"
+
+        fig, ax = plt.subplots(figsize=(4.6, 2.7))
+        fig.patch.set_alpha(0.0)
+        ax.patch.set_alpha(0.0)
+        ax.set_aspect("equal")
+        ax.axis("off")
+
+        pts = D.sun_map_points(POINT_SHADOWS, TERRACE_POINTS, sid, dt) if sid else None
+        if pts is None or len(pts) < 1:
+            ax.text(
+                0.5, 0.5, "Terrace layout not mapped", ha="center", va="center",
+                transform=ax.transAxes, color=muted, fontsize=9,
+            )
+            plt.close(fig)
+            return fig
+
+        # Local metre frame relative to the terrace centroid (north up).
+        lat0 = float(pts["lat"].mean())
+        lon0 = float(pts["lon"].mean())
+        mx = (pts["lon"].to_numpy() - lon0) * 111320.0 * np.cos(np.radians(lat0))
+        my = (pts["lat"].to_numpy() - lat0) * 110540.0
+        sun = pts["in_sun"].to_numpy().astype(bool)
+
+        pad = 2.2
+        xmin, xmax = mx.min() - pad, mx.max() + pad
+        ymin, ymax = my.min() - pad, my.max() + pad
+        if xmax - xmin < 7:
+            c = (xmin + xmax) / 2; xmin, xmax = c - 3.5, c + 3.5
+        if ymax - ymin < 7:
+            c = (ymin + ymax) / 2; ymin, ymax = c - 3.5, c + 3.5
+
+        # Nearest-point fill within a radius → an organic lit/shaded terrace shape.
+        res = 96
+        gx = np.linspace(xmin, xmax, res)
+        gy = np.linspace(ymin, ymax, res)
+        gxx, gyy = np.meshgrid(gx, gy)
+        d2 = (gxx[..., None] - mx) ** 2 + (gyy[..., None] - my) ** 2
+        nn = d2.argmin(axis=2)
+        nnd = np.sqrt(d2.min(axis=2))
+        sun_grid = sun[nn]
+        within = nnd <= 2.0
+        img = np.zeros((res, res, 4))
+        img[within & sun_grid] = (*sun_rgb, 0.88)
+        img[within & ~sun_grid] = (*shade_rgb, 0.88)
+        ax.imshow(
+            img, extent=[xmin, xmax, ymin, ymax], origin="lower",
+            interpolation="nearest", zorder=1,
+        )
+        ax.scatter(mx[sun], my[sun], c="#FB8500", s=15, edgecolors="white",
+                   linewidths=0.5, zorder=3)
+        ax.scatter(mx[~sun], my[~sun], c=shade_pt, s=15, edgecolors="white",
+                   linewidths=0.5, zorder=3)
+
+        # Sun-direction arrow (corner): where the light comes from.
+        az, alt = D.sun_az_alt(dt)
+        if alt > 0:
+            ux, uy = np.sin(np.radians(az)), np.cos(np.radians(az))
+            bx, by, L = 0.9, 0.84, 0.15
+            ax.annotate(
+                "", xy=(bx + ux * L, by + uy * L), xytext=(bx - ux * L * 0.3, by - uy * L * 0.3),
+                xycoords="axes fraction",
+                arrowprops=dict(arrowstyle="-|>", color="#FB8500", lw=2),
+            )
+            ax.scatter([bx + ux * L], [by + uy * L], transform=ax.transAxes, c="#FFB703",
+                       s=70, edgecolors="#FB8500", linewidths=1, zorder=5, clip_on=False)
+            ax.text(bx, 1.0, f"sun {D.compass_dir(az)}", transform=ax.transAxes,
+                    ha="center", va="bottom", color=muted, fontsize=7.5)
+
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(ymin, ymax)
+        fig.tight_layout(pad=0.2)
+        plt.close(fig)
+        return fig
 
     # ---------------- Day timeline ----------------
     @render.plot

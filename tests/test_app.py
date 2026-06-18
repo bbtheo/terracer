@@ -186,6 +186,23 @@ def test_multi_side_permit_polygons():
         assert len(permits.loc[tid].geometry.geoms) >= 2
 
 
+def test_sun_map_points():
+    """Per-point sun data drives the terrace sun-map infographic."""
+    D = _data()
+    tp = D.load_terrace_points()
+    ps = D.load_point_shadows()
+    assert len(tp) > 0 and len(ps) > 0
+    assert str(ps["datetime"].dt.tz) == "Europe/Helsinki"
+    # A multi-side polygon terrace has several mapped points.
+    sm = D.sun_map_points(ps, tp, "sivukirjasto", D.make_datetime(SAMPLE, NOON))
+    assert len(sm) >= 5
+    assert {"lon", "lat", "in_sun"}.issubset(sm.columns)
+    assert sm["in_sun"].dtype == bool
+    # Every terrace has at least one sample point (single-point bars approximated).
+    assert tp.groupby("terrace_id").size().min() >= 1
+    assert tp["terrace_id"].nunique() == 44
+
+
 def test_sun_az_alt_and_compass():
     D = _data()
     az, alt = D.sun_az_alt(D.make_datetime(date(2026, 6, 17), NOON))
