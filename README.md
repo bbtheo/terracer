@@ -45,8 +45,10 @@ terrace per datetime) is stored in a small parquet table the app reads at
 runtime, so the UI stays fast.
 
 The current sun/shade table covers **2026**, sampled **biweekly** across the
-year at **half-hourly** times from **08:00 to 23:00**, for **43 terraces**
-(each with real opening hours).
+year at **half-hourly** times from **08:00 to 23:00**, for **44 terraces**
+(each with real opening hours). Terraces that occupy more than one side of a
+building are stored as multi-part polygons, so the sun fraction integrates
+across all of their sides.
 
 ## Quick start
 
@@ -75,7 +77,7 @@ src/
   core/           Shared logic — sun position, mesh loading, ray casting, terraces
   preprocessing/  Offline pipeline — download, parse CityGML, compute shadows
 data/
-  terraces.geojson            43 terrace locations + opening hours + metadata
+  terraces.geojson            44 terrace locations + opening hours + metadata
   terrace_polygons.geojson    permit terrace polygons matched to bars
   processed/buildings.parquet building footprints + heights
   shadows/terrace_shadows.parquet  precomputed sun/shade table

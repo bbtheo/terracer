@@ -20,6 +20,7 @@ import unicodedata
 
 import geopandas as gpd
 import httpx
+import shapely
 from shapely.geometry import shape
 
 from src.core.terraces import load_terraces
@@ -96,7 +97,12 @@ def match_to_terraces(
 
     matches = []
     for _, bar in terraces_local.iterrows():
-        best = None
+        # Collect EVERY qualifying permit, not just the best one: a bar with a
+        # terrace on more than one side of the building has a separate permit
+        # per side. Unioning them yields a (Multi)Polygon that compute_shadows
+        # grid-samples across all sides, so the sun fraction reflects the whole
+        # terrace rather than a single facade.
+        qualifying = []  # (score, permit_index, distance, similarity)
         for permit_index, permit in permits_local.iterrows():
             distance = float(bar.geometry.distance(permit.geometry))
             if distance > MAX_MATCH_DISTANCE_M:
@@ -104,22 +110,25 @@ def match_to_terraces(
             similarity = _name_similarity(bar["name"], permit["permit_name"] or "")
             if similarity < MIN_NAME_SIMILARITY:
                 continue
-            score = similarity - distance / 1000.0
-            if best is None or score > best[0]:
-                best = (score, permit_index, distance, similarity)
-        if best is not None:
-            _, permit_index, distance, similarity = best
-            matches.append(
-                {
-                    "terrace_id": bar["id"],
-                    "bar_name": bar["name"],
-                    "permit_name": permits.loc[permit_index, "permit_name"],
-                    "permit_id": permits.loc[permit_index, "permit_id"],
-                    "distance_m": round(distance, 1),
-                    "similarity": round(similarity, 2),
-                    "geometry": permits.loc[permit_index, "geometry"],
-                }
-            )
+            qualifying.append((similarity - distance / 1000.0, permit_index, distance, similarity))
+        if not qualifying:
+            continue
+        qualifying.sort(key=lambda q: q[0], reverse=True)
+        _, best_index, distance, similarity = qualifying[0]
+        geoms = [permits.loc[pi, "geometry"] for _, pi, _, _ in qualifying]
+        merged = shapely.union_all(geoms) if len(geoms) > 1 else geoms[0]
+        matches.append(
+            {
+                "terrace_id": bar["id"],
+                "bar_name": bar["name"],
+                "permit_name": permits.loc[best_index, "permit_name"],
+                "permit_id": permits.loc[best_index, "permit_id"],
+                "permit_count": len(qualifying),
+                "distance_m": round(distance, 1),
+                "similarity": round(similarity, 2),
+                "geometry": merged,
+            }
+        )
 
     return gpd.GeoDataFrame(matches, geometry="geometry", crs="EPSG:4326")
 

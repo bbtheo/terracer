@@ -817,6 +817,25 @@
           60.1843942
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fat_tonys",
+        "name": "Fat Tony's",
+        "address": "Sturenkatu 21, 00510 Helsinki, Finland",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1922691,24.9531983",
+        "amenity": "bar",
+        "hours_text": "Mon–Wed 11–00, Thu–Fri 11–02, Sat 12–02, Sun 12–00",
+        "hours_json": "{\"Mon\":[660,0],\"Tue\":[660,0],\"Wed\":[660,0],\"Thu\":[660,120],\"Fri\":[660,120],\"Sat\":[720,120],\"Sun\":[720,0]}"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9531983,
+          60.1922691
+        ]
+      }
     }
   ]
 }

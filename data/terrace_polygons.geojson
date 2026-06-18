@@ -9,6 +9,7 @@
         "bar_name": "Bar Loosister",
         "permit_name": "Bar Loosister",
         "permit_id": "VP2200077",
+        "permit_count": 1,
         "distance_m": 2.2,
         "similarity": 1.0
       },
@@ -50,6 +51,7 @@
         "bar_name": "Femma IV",
         "permit_name": "Ravintola Femma",
         "permit_id": "VP2200225",
+        "permit_count": 1,
         "distance_m": 9.5,
         "similarity": 1.0
       },
@@ -91,6 +93,7 @@
         "bar_name": "Helsing Bar",
         "permit_name": "Helsing Bar",
         "permit_id": "VP2200261",
+        "permit_count": 1,
         "distance_m": 1.9,
         "similarity": 1.0
       },
@@ -132,6 +135,7 @@
         "bar_name": "Hendricks Pub Kallio",
         "permit_name": "Hendricks Pub & Seurahuone",
         "permit_id": "VP2400158",
+        "permit_count": 1,
         "distance_m": 2.8,
         "similarity": 0.67
       },
@@ -173,6 +177,7 @@
         "bar_name": "HogoHuone",
         "permit_name": "Hogo Huone",
         "permit_id": "VP2200075-2",
+        "permit_count": 1,
         "distance_m": 3.3,
         "similarity": 0.95
       },
@@ -214,6 +219,7 @@
         "bar_name": "Las Vegas",
         "permit_name": "Ravintola Las Vegas",
         "permit_id": "VP2200189",
+        "permit_count": 1,
         "distance_m": 2.4,
         "similarity": 1.0
       },
@@ -255,6 +261,7 @@
         "bar_name": "Majava Baari",
         "permit_name": "Beaver Bar / Majava Baari",
         "permit_id": "VP2200100-2",
+        "permit_count": 1,
         "distance_m": 5.4,
         "similarity": 1.0
       },
@@ -296,6 +303,7 @@
         "bar_name": "Mascot Bar & Live Stage",
         "permit_name": "Mascot",
         "permit_id": "VP2200071-3",
+        "permit_count": 1,
         "distance_m": 3.8,
         "similarity": 1.0
       },
@@ -337,6 +345,7 @@
         "bar_name": "Ruuhka",
         "permit_name": "Ruuhka Pub",
         "permit_id": "VP2200693",
+        "permit_count": 1,
         "distance_m": 3.6,
         "similarity": 1.0
       },
@@ -378,6 +387,7 @@
         "bar_name": "Rytmi",
         "permit_name": "Ravintola Rytmi",
         "permit_id": "VP2200470",
+        "permit_count": 1,
         "distance_m": 3.0,
         "similarity": 1.0
       },
@@ -419,6 +429,7 @@
         "bar_name": "Sivukirjasto",
         "permit_name": "Sivukirjasto",
         "permit_id": "VP2200296",
+        "permit_count": 2,
         "distance_m": 4.7,
         "similarity": 1.0
       },
@@ -428,24 +439,48 @@
           [
             [
               [
-                24.953406,
-                60.18432403
-              ],
-              [
-                24.953405,
-                60.18433903
+                24.953263,
+                60.18432203
               ],
               [
                 24.953262,
                 60.18433703
               ],
               [
-                24.953263,
-                60.18432203
+                24.953405,
+                60.18433903
               ],
               [
                 24.953406,
                 60.18432403
+              ],
+              [
+                24.953263,
+                60.18432203
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                24.95321,
+                60.18445803
+              ],
+              [
+                24.953241,
+                60.18445903
+              ],
+              [
+                24.953256,
+                60.18434303
+              ],
+              [
+                24.953225,
+                60.18434203
+              ],
+              [
+                24.95321,
+                60.18445803
               ]
             ]
           ]
@@ -460,6 +495,7 @@
         "bar_name": "William K. Kurvi",
         "permit_name": "William K. Kurvi",
         "permit_id": "VP2200338",
+        "permit_count": 1,
         "distance_m": 3.5,
         "similarity": 1.0
       },
@@ -487,6 +523,114 @@
               [
                 24.96141,
                 60.18743803
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "12",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "toveri",
+        "bar_name": "Toveri",
+        "permit_name": "Terassialue Bar Toveri",
+        "permit_id": "VP2500312",
+        "permit_count": 2,
+        "distance_m": 5.6,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.945326,
+                60.18402603
+              ],
+              [
+                24.945344,
+                60.18403703
+              ],
+              [
+                24.945438,
+                60.18400103
+              ],
+              [
+                24.945421,
+                60.18399003
+              ],
+              [
+                24.945326,
+                60.18402603
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                24.945427,
+                60.18412203
+              ],
+              [
+                24.945451,
+                60.18411203
+              ],
+              [
+                24.945357,
+                60.18405203
+              ],
+              [
+                24.945332,
+                60.18406203
+              ],
+              [
+                24.945427,
+                60.18412203
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "id": "13",
+      "type": "Feature",
+      "properties": {
+        "terrace_id": "way_bakery",
+        "bar_name": "Way Bakery",
+        "permit_name": "Way Bakery",
+        "permit_id": "VP2200386",
+        "permit_count": 1,
+        "distance_m": 5.3,
+        "similarity": 1.0
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                24.953621,
+                60.18432903
+              ],
+              [
+                24.953619,
+                60.18434703
+              ],
+              [
+                24.953411,
+                60.18434103
+              ],
+              [
+                24.953413,
+                60.18432303
+              ],
+              [
+                24.953621,
+                60.18432903
               ]
             ]
           ]

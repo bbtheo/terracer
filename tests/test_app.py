@@ -34,7 +34,7 @@ def _data():
 def test_loaders_return_expected_shapes():
     D = _data()
     terraces = D.load_terraces()
-    assert len(terraces) == 43
+    assert len(terraces) == 44
     assert {"id", "name", "amenity", "lon", "lat"}.issubset(terraces.columns)
     # Opening-hours parsed into a per-weekday schedule.
     assert {"week_hours", "hours_text"}.issubset(terraces.columns)
@@ -98,7 +98,7 @@ def test_snapshot_for_returns_all_terraces():
     terraces = D.load_terraces()
     shadows = D.load_shadows()
     snap = D.snapshot_for(shadows, terraces, D.make_datetime(SAMPLE, NOON))
-    assert len(snap) == len(terraces) == 43
+    assert len(snap) == len(terraces) == 44
     assert {"in_sun", "sun_fraction", "pct", "color"}.issubset(snap.columns)
     assert snap["sun_fraction"].between(0.0, 1.0).all()
     assert int(snap["in_sun"].sum()) >= 1
@@ -157,8 +157,8 @@ def test_ranked_for_orders_by_open_sun_and_respects_closed_days():
     shadows = D.load_shadows()
     mon = date(2026, 6, 15)  # request a Monday
     r = D.ranked_for(shadows, terraces, SAMPLE, NOON, req_date=mon)
-    assert len(r) == 43
-    assert r["Rank"].tolist() == list(range(1, 44))
+    assert len(r) == 44
+    assert r["Rank"].tolist() == list(range(1, 45))
     # Ordered by remaining open+sunny slots, descending.
     assert r["osl_slots"].tolist() == sorted(r["osl_slots"].tolist(), reverse=True)
     assert {"open_now", "osl_hours", "hours_text"}.issubset(r.columns)
@@ -171,8 +171,19 @@ def test_ranked_for_orders_by_open_sun_and_respects_closed_days():
 def test_new_bars_present():
     D = _data()
     ids = set(D.load_terraces()["id"])
-    assert {"toveri", "alkuviini", "mamas_empanadas", "way_bakery"}.issubset(ids)
+    assert {"toveri", "alkuviini", "mamas_empanadas", "way_bakery", "fat_tonys"}.issubset(ids)
     assert "barbers_beer_company" not in ids
+
+
+def test_multi_side_permit_polygons():
+    """Bars with a terrace on more than one side of the building are stored as a
+    multi-part polygon so the sun fraction integrates across all sides."""
+    D = _data()
+    permits = D.load_permit_polygons().set_index("terrace_id")
+    for tid in ("sivukirjasto", "toveri"):
+        assert tid in permits.index
+        assert permits.loc[tid].geometry.geom_type == "MultiPolygon"
+        assert len(permits.loc[tid].geometry.geoms) >= 2
 
 
 def test_sun_az_alt_and_compass():
