@@ -4,25 +4,6 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "bar_lab",
-        "name": "Bar Lab",
-        "address": "Helsinki, Finland",
-        "maps_url": "https://www.google.com/maps/search/?api=1&query=60.1856073,24.9463414",
-        "amenity": "pub",
-        "hours_text": "Daily 09–02",
-        "hours_json": "{\"Mon\":[540,120],\"Tue\":[540,120],\"Wed\":[540,120],\"Thu\":[540,120],\"Fri\":[540,120],\"Sat\":[540,120],\"Sun\":[540,120]}"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.9463414,
-          60.1856073
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "id": "bar_loosister",
         "name": "Bar Loosister",
         "address": "Hämeentie 50, 00500 Helsinki, Finland",

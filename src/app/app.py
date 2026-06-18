@@ -13,6 +13,7 @@ import html as _html
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import matplotlib
 
@@ -40,10 +41,21 @@ DEFAULT_DATE = D.default_date()
 PERMIT_IDS = set(PERMITS["terrace_id"]) if "terrace_id" in PERMITS.columns else set()
 
 WEEKDAY_FMT = "%a %-d %b"   # e.g. "Mon 17 Jun"
+_HKI = ZoneInfo("Europe/Helsinki")
 
 
 def _fmt_date(d: date) -> str:
     return d.strftime(WEEKDAY_FMT)
+
+
+def _now_slider_value() -> datetime:
+    """Current Helsinki time snapped to 30-min grid, clamped 08:00-23:00, on the slider reference day."""
+    now = datetime.now(_HKI)
+    m = round(now.minute / 30) * 30
+    h = now.hour + (1 if m == 60 else 0)
+    m = 0 if m == 60 else m
+    h = max(8, min(23, h))
+    return datetime(2026, 1, 1, h, m, tzinfo=timezone.utc)
 
 
 # ---------------------------------------------------------------------------
@@ -201,7 +213,7 @@ when_toolbar = ui.card(
                 # wall-clock time (08:00–23:00) and reads it back unshifted.
                 min=datetime(2026, 1, 1, 8, 0, tzinfo=timezone.utc),
                 max=datetime(2026, 1, 1, 23, 0, tzinfo=timezone.utc),
-                value=datetime(2026, 1, 1, 14, 0, tzinfo=timezone.utc),
+                value=_now_slider_value(),
                 step=1800,  # 30-minute steps, in seconds → half-hourly
                 time_format="%H:%M",
                 timezone="+0000",
@@ -218,34 +230,6 @@ when_toolbar = ui.card(
 # ---------------------------------------------------------------------------
 # Tab 1 — Dashboard
 # ---------------------------------------------------------------------------
-kpi_band = ui.layout_columns(
-    ui.value_box(
-        "In the sun now",
-        ui.output_text("vb_count"),
-        showcase=ui.HTML('<i class="bi bi-sun-fill"></i>'),
-        theme=ui.value_box_theme(bg="#FFB703", fg="#3a2f00"),
-    ),
-    ui.value_box(
-        "Best right now",
-        ui.output_ui("vb_best"),
-        showcase=ui.HTML('<i class="bi bi-trophy"></i>'),
-        theme=ui.value_box_theme(bg="#FB8500", fg="#ffffff"),
-    ),
-    ui.value_box(
-        "Avg terrace in sun",
-        ui.output_text("vb_avg"),
-        showcase=ui.HTML('<i class="bi bi-cloud-sun"></i>'),
-        theme=ui.value_box_theme(fg="#FB8500"),
-    ),
-    ui.value_box(
-        "Open + sun left",
-        ui.output_text("vb_left"),
-        showcase=ui.HTML('<i class="bi bi-hourglass-split"></i>'),
-        theme=ui.value_box_theme(bg="#FFD166", fg="#3a2f00"),
-    ),
-    col_widths={"sm": (6, 6, 6, 6), "lg": (3, 3, 3, 3)},
-)
-
 rank_card = ui.card(
     ui.card_header(
         ui.HTML('<i class="bi bi-trophy"></i> Open &amp; sunny — '),
@@ -279,7 +263,6 @@ dashboard_map_card = ui.card(
 
 nav_dashboard = ui.nav_panel(
     "Dashboard",
-    kpi_band,
     ui.layout_columns(
         rank_card, detail_card, col_widths={"sm": (12, 12), "lg": (7, 5)}
     ),
@@ -377,11 +360,8 @@ def server(input, output, session):
 
     @reactive.effect
     def _default_to_open_date():
-        # Default the date picker to the day the app is OPENED (today, mapped
-        # onto the 2026 data year). Recomputed per session so a long-lived
-        # Connect Cloud process never stays pinned to its start date. Runs once
-        # at session start (no reactive dependencies).
         ui.update_date("date", value=D._today_ref())
+        ui.update_slider("time", value=_now_slider_value())
 
     @reactive.calc
     def is_dark() -> bool:
@@ -467,41 +447,6 @@ def server(input, output, session):
     def rank_when():
         _, minutes, _, _, req = snapped()
         return f"{_fmt_date(req)}, {D.fmt_minutes(minutes)}"
-
-    # ---------------- KPI value boxes ----------------
-    @render.text
-    def vb_count():
-        df = snapshot_df()
-        return f"{int(df['in_sun'].sum())} / {len(df)}"
-
-    @render.ui
-    def vb_best():
-        r = ranked()
-        if not len(r):
-            return ui.span("—")
-        top = r.iloc[0]
-        if int(top["osl_slots"]) <= 0:
-            return ui.span("Nothing open & sunny")
-        return ui.HTML(
-            f'<div style="font-size:1.05rem;font-weight:700;line-height:1.1">'
-            f"{_html.escape(str(top['name']))}</div>"
-            f'<div style="font-size:.85rem;opacity:.9">'
-            f'{D.fmt_duration(int(top["osl_slots"]))} of open sun left</div>'
-        )
-
-    @render.text
-    def vb_avg():
-        df = snapshot_df()
-        return f"{df['sun_fraction'].mean() * 100:.0f}%"
-
-    @render.text
-    def vb_left():
-        ctx = detail_ctx()
-        rec = ctx["rec"]
-        if rec is None:
-            return "—"
-        slots = int(rec.get("osl_slots", 0) or 0)
-        return D.fmt_duration(slots) if slots > 0 else "None"
 
     # ---------------- Ranked grid ----------------
     @render.data_frame
@@ -592,36 +537,8 @@ def server(input, output, session):
             return ui.p("No terrace selected.")
 
         frac = float(rec["sun_fraction"])
-        in_sun = bool(rec["in_sun"])
         bh_hour, bh_frac = D.best_hour(prof)
-
-        d1 = ui.value_box(
-            "In sun?",
-            "☀ In sun" if in_sun else "☁ In shade",
-            showcase=ui.HTML(
-                '<i class="bi bi-sun"></i>' if in_sun else '<i class="bi bi-cloud"></i>'
-            ),
-            theme=ui.value_box_theme(bg="#FFB703", fg="#3a2f00")
-            if in_sun
-            else ui.value_box_theme(bg="#ECEEF2", fg="#5B6470"),
-        )
-        d2 = ui.value_box(
-            "% of terrace lit",
-            ui.HTML(
-                f"{int(round(frac*100))}%"
-                f'<div class="frac-bar-wrap"><div class="frac-bar" '
-                f'style="width:{int(round(frac*100))}%"></div></div>'
-            ),
-            showcase=ui.HTML('<i class="bi bi-brightness-high"></i>'),
-            theme=ui.value_box_theme(bg="#FFB703", fg="#3a2f00"),
-        )
         osl_slots = int(rec.get("osl_slots", 0) or 0)
-        d3 = ui.value_box(
-            "Open + sun left",
-            D.fmt_duration(osl_slots) if osl_slots > 0 else "None",
-            showcase=ui.HTML('<i class="bi bi-hourglass-split"></i>'),
-            theme=ui.value_box_theme(bg="#FFD166", fg="#3a2f00"),
-        )
 
         # Opening-hours: live open/closed + today's hours, then the full week.
         open_now = bool(rec.get("open_now", False))
@@ -643,6 +560,13 @@ def server(input, output, session):
                 ui.HTML(
                     f'<div class="detail-meta"><i class="bi bi-calendar-week"></i> '
                     f"{hours_text}</div>"
+                )
+            )
+        if osl_slots > 0:
+            meta.append(
+                ui.HTML(
+                    f'<div class="detail-meta"><i class="bi bi-hourglass-split"></i> '
+                    f"<b>{D.fmt_duration(osl_slots)}</b> open &amp; sunny left today</div>"
                 )
             )
         if bh_hour is not None:
@@ -679,9 +603,6 @@ def server(input, output, session):
             )
 
         return ui.TagList(
-            ui.layout_columns(
-                d1, d2, d3, col_widths={"xs": (12, 12, 12), "sm": (4, 4, 4)}
-            ),
             ui.div(
                 ui.HTML(
                     '<i class="bi bi-sun"></i> <b>Sun on the terrace now</b> — '

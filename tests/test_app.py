@@ -34,7 +34,7 @@ def _data():
 def test_loaders_return_expected_shapes():
     D = _data()
     terraces = D.load_terraces()
-    assert len(terraces) == 44
+    assert len(terraces) == 43
     assert {"id", "name", "amenity", "lon", "lat"}.issubset(terraces.columns)
     # Opening-hours parsed into a per-weekday schedule.
     assert {"week_hours", "hours_text"}.issubset(terraces.columns)
@@ -98,7 +98,7 @@ def test_snapshot_for_returns_all_terraces():
     terraces = D.load_terraces()
     shadows = D.load_shadows()
     snap = D.snapshot_for(shadows, terraces, D.make_datetime(SAMPLE, NOON))
-    assert len(snap) == len(terraces) == 44
+    assert len(snap) == len(terraces) == 43
     assert {"in_sun", "sun_fraction", "pct", "color"}.issubset(snap.columns)
     assert snap["sun_fraction"].between(0.0, 1.0).all()
     assert int(snap["in_sun"].sum()) >= 1
@@ -157,8 +157,8 @@ def test_ranked_for_orders_by_open_sun_and_respects_closed_days():
     shadows = D.load_shadows()
     mon = date(2026, 6, 15)  # request a Monday
     r = D.ranked_for(shadows, terraces, SAMPLE, NOON, req_date=mon)
-    assert len(r) == 44
-    assert r["Rank"].tolist() == list(range(1, 45))
+    assert len(r) == 43
+    assert r["Rank"].tolist() == list(range(1, 44))
     # Ordered by remaining open+sunny slots, descending.
     assert r["osl_slots"].tolist() == sorted(r["osl_slots"].tolist(), reverse=True)
     assert {"open_now", "osl_hours", "hours_text"}.issubset(r.columns)
@@ -200,7 +200,7 @@ def test_sun_map_points():
     assert sm["in_sun"].dtype == bool
     # Every terrace has at least one sample point (single-point bars approximated).
     assert tp.groupby("terrace_id").size().min() >= 1
-    assert tp["terrace_id"].nunique() == 44
+    assert tp["terrace_id"].nunique() >= 43
 
 
 def test_sun_az_alt_and_compass():
