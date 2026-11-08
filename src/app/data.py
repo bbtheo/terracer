@@ -74,6 +74,16 @@ def load_blocks() -> gpd.GeoDataFrame:
     return gpd.read_parquet(DATA_DIR / "processed" / "city_blocks.parquet").to_crs(MAP_CRS)
 
 
+def load_roads() -> gpd.GeoDataFrame:
+    """Street centrelines with a drawn width in metres (see fetch_map_base)."""
+    return gpd.read_parquet(DATA_DIR / "processed" / "map_roads.parquet").to_crs(MAP_CRS)
+
+
+def load_water() -> gpd.GeoDataFrame:
+    """Sea and inland water polygons (see fetch_map_base)."""
+    return gpd.read_parquet(DATA_DIR / "processed" / "map_water.parquet").to_crs(MAP_CRS)
+
+
 def load_terrace_centres() -> pd.DataFrame:
     """Mean position (EPSG:3879) of the points each terrace was ray cast from.
     These sit on the terrace itself, while the bar's own point is often on the roof."""
@@ -184,6 +194,16 @@ def build_payload() -> dict:
             ring = [_local(x, y, origin) for x, y in part.exterior.coords[:-1]]
             blocks.append([round(float(height)), ring])
 
+    roads_gdf = load_roads()
+    roads = [
+        [int(width), [_local(x, y, origin) for x, y in line.coords]]
+        for width, line in zip(roads_gdf["width"], roads_gdf.geometry)
+    ]
+    water = [
+        [[_local(x, y, origin) for x, y in ring.coords[:-1]] for ring in [polygon.exterior, *polygon.interiors]]
+        for polygon in load_water().geometry
+    ]
+
     xs = [p[0] for _, ring in blocks for p in ring]
     ys = [p[1] for _, ring in blocks for p in ring]
     return {
@@ -192,6 +212,8 @@ def build_payload() -> dict:
         "bars": bars,
         "dates": dates,
         "blocks": blocks,
+        "roads": roads,
+        "water": water,
     }
 
 

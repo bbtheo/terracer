@@ -16,6 +16,7 @@ parse = "python -m src.preprocessing.parse_citygml"
 fetch_polygons = "python -m src.preprocessing.fetch_terrace_polygons"
 shadows = "python -m src.preprocessing.compute_shadows"
 blocks = "python -m src.preprocessing.build_city_blocks"
+basemap = "python -m src.preprocessing.fetch_map_base"
 
 [dependencies]
 python = ">=3.11"
