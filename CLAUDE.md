@@ -26,6 +26,7 @@ pixi run download     # Download CityGML (manual URL required)
 pixi run download_mesh # Download mesh tiles covering terraces
 pixi run fetch_polygons # Fetch terrace permit polygons (Helsinki WFS), match to bars
 pixi run blocks       # Build map footprints (city WFS) with mesh-measured heights
+pixi run basemap      # Fetch map streets and water (city WFS)
 pixi run test         # Run tests
 pixi shell            # Enter the environment shell
 ```
@@ -36,7 +37,7 @@ pixi shell            # Enter the environment shell
 - `src/app/` - Shiny host (`app.py`), data bundling (`data.py`), client page (`www/terracer.js`, `www/terracer.css`)
 - `src/core/` - shared logic (sun position, ray casting, terrace model)
 - `data/raw/` - downloaded CityGML + mesh tiles (gitignored)
-- `data/processed/` - CityGML buildings parquet, `city_blocks.parquet` (map footprints with mesh heights)
+- `data/processed/` - CityGML buildings parquet, `city_blocks.parquet` (map footprints with mesh heights), `map_roads.parquet` and `map_water.parquet` (map base)
 - `data/shadows/` - precomputed sun/shade tables
 - `data/terraces.geojson` - terrace locations + metadata
 - `data/terrace_polygons.geojson` - terrace permit polygons matched to bars (city WFS)

@@ -14,6 +14,7 @@ deploys directly from this GitHub repo and builds the Python environment from
 - **`src/app/www/`** — the page's script and stylesheet.
 - **`data/`** — the small precomputed inputs the app loads at startup
   (`terraces.geojson`, `processed/city_blocks.parquet`,
+  `processed/map_roads.parquet`, `processed/map_water.parquet`,
   `shadows/terrace_shadows.parquet`, `shadows/terrace_points.parquet`, ~0.3 MB
   total). `data/raw/` (the multi-GB
   3D mesh) is **gitignored** and only used by the offline pipeline.
@@ -48,6 +49,7 @@ from the 3D mesh:
 
 ```bash
 pixi run blocks           # writes data/processed/city_blocks.parquet
+pixi run basemap          # writes data/processed/map_roads.parquet + map_water.parquet
 ```
 
 ## Local check against the deploy environment

@@ -88,6 +88,7 @@ tests/            pytest suites
 | `pixi run app` | Run the Shiny app |
 | `pixi run shadows` | Recompute the sun/shade table |
 | `pixi run blocks` | Rebuild the map's building footprints |
+| `pixi run basemap` | Fetch the map's streets and water |
 | `pixi run download_mesh` | Download Helsinki 3D mesh tiles (use `--insecure`) |
 | `pixi run fetch_polygons` | Fetch terrace permit polygons (Helsinki WFS) |
 | `pixi run test` | Run the test suite |
@@ -98,6 +99,11 @@ tests/            pytest suites
 pixi run test                       # full suite (app + core/preprocessing)
 pixi run pytest tests/test_app.py   # just the app's data-layer tests
 ```
+
+## Data
+
+Building footprints, streets and water are open data from the
+[City of Helsinki](https://kartta.hel.fi/) (CC BY 4.0), as is the 3D city model.
 
 ## Tech stack
 

@@ -39,27 +39,35 @@ MIN_MESH_COVERAGE = 0.6
 FALLBACK_HEIGHT_M = 18.0
 
 
-def fetch_footprints(bounds: tuple[float, float, float, float]) -> gpd.GeoDataFrame:
-    """Download every building footprint intersecting `bounds` (EPSG:3879)."""
+def map_bounds() -> tuple[float, float, float, float]:
+    """The area the app's map covers, in EPSG:3879."""
+    minx, miny, maxx, maxy = load_terraces().to_crs(CRS).total_bounds
+    return (minx - MARGIN_M, miny - MARGIN_M, maxx + MARGIN_M, maxy + MARGIN_M)
+
+
+def fetch_layer(
+    layer: str, bounds: tuple[float, float, float, float], sort_by: str | None = None
+) -> gpd.GeoDataFrame:
+    """Download every feature of a city WFS layer intersecting `bounds`.
+    Paging needs a stable order, so pass `sort_by` for layers that can exceed a page."""
     frames = []
     start = 0
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
         while True:
-            response = client.get(
-                WFS_URL,
-                params={
-                    "service": "WFS",
-                    "version": "2.0.0",
-                    "request": "GetFeature",
-                    "typeNames": LAYER,
-                    "outputFormat": "application/json",
-                    "srsName": CRS,
-                    "bbox": ",".join(map(str, bounds)) + f",{CRS}",
-                    "count": PAGE_SIZE,
-                    "startIndex": start,
-                    "sortBy": "id",
-                },
-            )
+            params = {
+                "service": "WFS",
+                "version": "2.0.0",
+                "request": "GetFeature",
+                "typeNames": layer,
+                "outputFormat": "application/json",
+                "srsName": CRS,
+                "bbox": ",".join(map(str, bounds)) + f",{CRS}",
+                "count": PAGE_SIZE,
+                "startIndex": start,
+            }
+            if sort_by:
+                params["sortBy"] = sort_by
+            response = client.get(WFS_URL, params=params)
             response.raise_for_status()
             features = response.json().get("features", [])
             if features:
@@ -68,9 +76,10 @@ def fetch_footprints(bounds: tuple[float, float, float, float]) -> gpd.GeoDataFr
                 break
             start += PAGE_SIZE
     if not frames:
-        raise ValueError("WFS returned no building footprints.")
-    combined = gpd.pd.concat(frames, ignore_index=True)
-    return gpd.GeoDataFrame(combined[["geometry"]], geometry="geometry", crs=CRS)
+        raise ValueError(f"WFS returned no features for {layer}.")
+    result = gpd.GeoDataFrame(gpd.pd.concat(frames, ignore_index=True), geometry="geometry", crs=CRS)
+    result["geometry"] = shapely.force_2d(result.geometry.values)  # some layers carry Z
+    return result
 
 
 def _load_triangles(
@@ -168,11 +177,10 @@ def main() -> int:
     parser.add_argument("--mesh-lod", default="L15")
     args = parser.parse_args()
 
-    minx, miny, maxx, maxy = load_terraces().to_crs(CRS).total_bounds
-    bounds = (minx - MARGIN_M, miny - MARGIN_M, maxx + MARGIN_M, maxy + MARGIN_M)
+    bounds = map_bounds()
 
     print("Downloading footprints")
-    footprints = fetch_footprints(bounds).explode(index_parts=False, ignore_index=True)
+    footprints = fetch_layer(LAYER, bounds, sort_by="id")[["geometry"]].explode(ignore_index=True)
     footprints = footprints[footprints.area >= MIN_AREA_M2].reset_index(drop=True)
     print(f"{len(footprints)} footprints")
 

@@ -123,6 +123,18 @@ def test_dots_sit_on_terraces_not_rooftops():
     assert on_roof < len(payload["bars"]) / 4
 
 
+def test_map_has_streets_and_water():
+    payload = _payload()
+    x0, y0, x1, y1 = payload["bounds"]
+    margin = 200  # streets and water are clipped to the map area, not to the footprints
+    assert {width for width, _ in payload["roads"]} == {3, 8, 13}
+    for _, line in payload["roads"]:
+        assert len(line) >= 2
+        assert all(x0 - margin < x < x1 + margin and y0 - margin < y < y1 + margin for x, y in line)
+    assert payload["water"]
+    assert all(len(ring) >= 3 for rings in payload["water"] for ring in rings)
+
+
 def test_payload_json_is_safe_in_a_script_tag():
     D = _data()
     text = D.payload_json()

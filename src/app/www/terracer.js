@@ -7,40 +7,45 @@
   const DATES = DATA.dates;
   for (const d of DATES) for (const id in d.s) d.s[id] = [...d.s[id]].map((c) => parseInt(c, 11) / 10);
 
-  const BLOCKS = DATA.blocks.map(([height, ring]) => {
-    const xs = ring.map((p) => p[0]);
-    const ys = ring.map((p) => p[1]);
-    return { height, ring, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
-  });
+  const boxed = (points) => {
+    const xs = points.map((p) => p[0]);
+    const ys = points.map((p) => p[1]);
+    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  };
+  const ROADS = DATA.roads.map(([width, line]) => ({ width, line, ...boxed(line) }));
+  const ROAD_WIDTHS = [...new Set(ROADS.map((r) => r.width))].sort((a, b) => a - b);
+  const WATER = DATA.water;
+
+  const BLOCKS = DATA.blocks.map(([height, ring]) => ({ height, ring, ...boxed(ring) }));
 
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const fmt = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
   // --- Colour ---------------------------------------------------------------
-  const TOKENS = ['ground', 'shade', 'bldg', 'sheet', 'ink', 'mut', 'sun', 'slot', 'line', 'dot', 'row'];
+  const TOKENS = ['ground', 'shade', 'bldg', 'sheet', 'ink', 'mut', 'sun', 'slot', 'line', 'dot', 'row', 'water'];
   const keys = (s) => s.split(' ').map((x) => `#${x}`);
 
   // Keyed on sun height scaled so the day's peak is 55 (see equivalentAltitude).
   const DARK_FROM = 7;
   const DARK = [
-    [-6, keys('0E0D30 0B0A28 22215A 0D0C28 F2EEFA B4AED0 FFA95C 2E2C58 24224C 0D0C28 25234F')],
-    [-2, keys('17164A 121140 2C2A6C 12113A F2EEFA B8B2D6 FFA95C 34315F 2A2755 12113A 2C2958')],
-    [2, keys('4F3A96 35297C 6650AE 1E1A44 F4EFFA BFB6D8 FFA050 3D3568 322A5A 1E1A44 352C60')],
-    [7, keys('E8705E 4F3A96 F2A88E 2A1F4A F6EFFA C4B8DA FF9A4D 4A3D70 3E3260 2A1F4A 42346A')],
+    [-6, keys('0E0D30 0B0A28 22215A 0D0C28 F2EEFA B4AED0 FFA95C 2E2C58 24224C 0D0C28 25234F 12254F')],
+    [-2, keys('17164A 121140 2C2A6C 12113A F2EEFA B8B2D6 FFA95C 34315F 2A2755 12113A 2C2958 1A2F63')],
+    [2, keys('4F3A96 35297C 6650AE 1E1A44 F4EFFA BFB6D8 FFA050 3D3568 322A5A 1E1A44 352C60 3E4FA6')],
+    [7, keys('E8705E 4F3A96 F2A88E 2A1F4A F6EFFA C4B8DA FF9A4D 4A3D70 3E3260 2A1F4A 42346A 6C7FC4')],
   ];
   const AFTERNOON = [
-    [7, keys('E8705E 4F3A96 F2A88E FFE1CF 2B1230 63405A B8391A EBC8BA F4D6C8 33246E FBCFB9')],
-    [12, keys('FF9A58 6448AE FFC79A FFEBD6 2F1530 6A4560 C84512 EFD2BD F6DFCB 3F2E80 FFDCBE')],
-    [20, keys('FFC56E 8470CC FFEBC8 FFF6E6 33213F 6C5367 D9531C F0DECC F7E8D9 4D3D8C FFE6CF')],
-    [35, keys('FFE3C2 A79ADF FFF8EE FFFDF9 2F2748 6A6189 E25A1E E7E1F3 F1ECF7 5B4F98 FFF0E6')],
-    [55, keys('FFF6DC A9B4F0 FFFFFF FFFFFF 2A2448 625A82 E25A1E E6E5F6 F0EFF9 4F4A9A FFF2E2')],
+    [7, keys('E8705E 4F3A96 F2A88E FFE1CF 2B1230 63405A B8391A EBC8BA F4D6C8 33246E FBCFB9 5F7FC8')],
+    [12, keys('FF9A58 6448AE FFC79A FFEBD6 2F1530 6A4560 C84512 EFD2BD F6DFCB 3F2E80 FFDCBE 6FA8D6')],
+    [20, keys('FFC56E 8470CC FFEBC8 FFF6E6 33213F 6C5367 D9531C F0DECC F7E8D9 4D3D8C FFE6CF 8CC4E0')],
+    [35, keys('FFE3C2 A79ADF FFF8EE FFFDF9 2F2748 6A6189 E25A1E E7E1F3 F1ECF7 5B4F98 FFF0E6 9FD6E6')],
+    [55, keys('FFF6DC A9B4F0 FFFFFF FFFFFF 2A2448 625A82 E25A1E E6E5F6 F0EFF9 4F4A9A FFF2E2 A8E0EC')],
   ];
   const MORNING = [
     AFTERNOON[0],
-    [12, keys('FFC6A8 7C7FD6 FFE0CC FFF0E6 2A2048 5F4F70 D64A26 EAD6D8 F3E2E0 3E3880 FCDDD4')],
-    [20, keys('FFDFB0 8F97DF FFF1DE FFF9F0 2C2448 63597D DB531F E8E0EC F2EAEC 4A478F FFEBDD')],
-    [35, keys('FFEECB 9FACE8 FFFDF3 FFFFFA 2A2848 615F85 E25A1E E3E4F3 EEEFF7 54579E FFF0E3')],
+    [12, keys('FFC6A8 7C7FD6 FFE0CC FFF0E6 2A2048 5F4F70 D64A26 EAD6D8 F3E2E0 3E3880 FCDDD4 86B6DC')],
+    [20, keys('FFDFB0 8F97DF FFF1DE FFF9F0 2C2448 63597D DB531F E8E0EC F2EAEC 4A478F FFEBDD 98CCE6')],
+    [35, keys('FFEECB 9FACE8 FFFDF3 FFFFFA 2A2848 615F85 E25A1E E3E4F3 EEEFF7 54579E FFF0E3 A5DAEA')],
     AFTERNOON[4],
   ];
 
@@ -145,6 +150,7 @@
     .map((h) => `<span style="left:${(((h - 8) * 2 + 0.5) / N) * 100}%">${String(h).padStart(2, '0')}</span>`).join('');
   app.innerHTML = `
     <canvas class="map"></canvas>
+    <div class="credit">© City of Helsinki</div>
     <div class="sheet">
       <button class="pill" aria-label="Drag sideways to change the value, or up and down to resize the table. Arrow keys also work."></button>
       <div class="column"></div><div class="neck"></div>
@@ -169,7 +175,10 @@
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const METRES_PER_PX = 2;
+  const DEFAULT_ZOOM = 2; // metres per CSS pixel; smaller is closer
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 5;
+  const MIN_ROAD_PX = { 3: 0.8, 8: 1.5, 13: 2.5 };
   const MAX_SHADOW_M = 260;
   const SNAP_PX = 70;
   const MINI_H = 50;
@@ -199,14 +208,15 @@
   let colours = paletteAt(dateRow, slot).map((c) => [...c]), P = {};
   let top = 0, topTarget = 0, raf = 0;
   let cx = 0, cy = 0, cxTarget = 0, cyTarget = 0;
+  let zoom = DEFAULT_ZOOM, zoomTarget = DEFAULT_ZOOM;
 
   const cardHeight = () => (picking ? 50 + 52 : 44 + 20) + MINI_H + 4;
   const viewCentreY = () => top / 2 + 8;
   const visibleBottom = () => (top >= MAP_TOP - 100 ? H : top);
-  const clampCx = (x) => { const half = (W * METRES_PER_PX) / 2, a = X0 + half, b = X1 - half; return a < b ? clamp(x, a, b) : (a + b) / 2; };
-  const clampCy = (y) => { const a = Y0 + (visibleBottom() - viewCentreY()) * METRES_PER_PX, b = Y1 - viewCentreY() * METRES_PER_PX; return a < b ? clamp(y, a, b) : (a + b) / 2; };
-  const px = (x) => W / 2 + (x - cx) / METRES_PER_PX;
-  const py = (y) => viewCentreY() - (y - cy) / METRES_PER_PX;
+  const clampCx = (x) => { const half = (W * zoom) / 2, a = X0 + half, b = X1 - half; return a < b ? clamp(x, a, b) : (a + b) / 2; };
+  const clampCy = (y) => { const a = Y0 + (visibleBottom() - viewCentreY()) * zoom, b = Y1 - viewCentreY() * zoom; return a < b ? clamp(y, a, b) : (a + b) / 2; };
+  const px = (x) => W / 2 + (x - cx) / zoom;
+  const py = (y) => viewCentreY() - (y - cy) / zoom;
 
   function applyColours() {
     TOKENS.forEach((name, k) => { P[name] = toHex(colours[k]); app.style.setProperty(`--${name}`, P[name]); });
@@ -250,8 +260,8 @@
     if (top < 4 || !W) return;
     const [azimuth, altitude] = dateRow.sun[slot];
     const v = viewCentreY();
-    const left = cx - (W * METRES_PER_PX) / 2, right = cx + (W * METRES_PER_PX) / 2;
-    const north = cy + v * METRES_PER_PX, south = cy - (H - v) * METRES_PER_PX;
+    const left = cx - (W * zoom) / 2, right = cx + (W * zoom) / 2;
+    const north = cy + v * zoom, south = cy - (H - v) * zoom;
 
     shadowCtx.globalCompositeOperation = 'source-over';
     shadowCtx.clearRect(0, 0, W, H);
@@ -286,6 +296,8 @@
     ctx.fillStyle = P.ground;
     ctx.fillRect(0, 0, W, H);
     ctx.drawImage(shadowCanvas, 0, 0, W, H);
+    drawWater();
+    drawRoads(left, right, south, north);
     ctx.fillStyle = P.bldg;
     for (const b of BLOCKS) {
       if (b.x1 < left || b.x0 > right || b.y1 < south || b.y0 > north) continue;
@@ -308,6 +320,36 @@
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillText(selected.n, labelX + labelW / 2, labelY + 12.5);
+  }
+
+  function drawWater() {
+    ctx.fillStyle = P.water;
+    ctx.beginPath();
+    for (const rings of WATER) {
+      for (const ring of rings) {
+        ring.forEach((p, j) => { if (j) ctx.lineTo(px(p[0]), py(p[1])); else ctx.moveTo(px(p[0]), py(p[1])); });
+        ctx.closePath();
+      }
+    }
+    ctx.fill('evenodd');
+  }
+
+  // Translucent, so streets stay visible in both sun and shade.
+  function drawRoads(left, right, south, north) {
+    ctx.save();
+    ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.strokeStyle = P.bldg;
+    ctx.globalAlpha = 0.6;
+    for (const width of ROAD_WIDTHS) {
+      ctx.lineWidth = Math.max(width / zoom, MIN_ROAD_PX[width]);
+      ctx.beginPath();
+      for (const r of ROADS) {
+        if (r.width !== width || r.x1 < left || r.x0 > right || r.y1 < south || r.y0 > north) continue;
+        r.line.forEach((p, j) => { if (j) ctx.lineTo(px(p[0]), py(p[1])); else ctx.moveTo(px(p[0]), py(p[1])); });
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function tracePolygon(target, ring, ex, ey) {
@@ -443,6 +485,9 @@
     if (Math.abs(et) > 0.5) { top += et * (still ? 1 : 0.25); moving = true; } else top = topTarget;
     shapeSheet();
 
+    const ez = zoomTarget - zoom;
+    if (Math.abs(ez) > 0.005) { zoom += ez * (still ? 1 : 0.25); moving = true; } else zoom = zoomTarget;
+
     cxTarget = clampCx(cxTarget);
     cyTarget = clampCy(cyTarget);
     const ex = cxTarget - cx, ey = cyTarget - cy;
@@ -498,8 +543,8 @@
   // --- Sheet sizing ---------------------------------------------------------
   const clampTop = (v) => clamp(v, 0, MAP_TOP);
   const snapTop = (v) => (v < SNAP_PX ? 0 : v > MAP_TOP - SNAP_PX ? MAP_TOP : v);
-  function resizeTo(gesture, dy) {
-    const raw = clampTop(gesture.top + dy);
+  function resizeTo(gesture, dy) { moveSheet(gesture, clampTop(gesture.top + dy)); }
+  function moveSheet(gesture, raw) {
     const snapped = snapTop(raw);
     const isSnapped = snapped !== raw;
     if (isSnapped && !gesture.snapped && navigator.vibrate) navigator.vibrate(8);
@@ -516,28 +561,96 @@
   }
 
   // --- Gestures -------------------------------------------------------------
-  function trackDrag(el, onValue, { lazy = false, pad = 0 } = {}) {
-    let active = false, startX = 0, live = false;
-    const apply = (e) => {
-      const r = el.getBoundingClientRect();
-      onValue(clamp((e.clientX - r.left - pad) / (r.width - 2 * pad), 0, 1));
-    };
-    el.addEventListener('pointerdown', (e) => {
-      active = true; startX = e.clientX; el.dragged = false; live = !lazy;
-      if (live) { el.setPointerCapture(e.pointerId); apply(e); }
-    });
-    el.addEventListener('pointermove', (e) => {
-      if (!active) return;
-      if (!live && Math.abs(e.clientX - startX) > 6) { live = true; el.dragged = true; el.setPointerCapture(e.pointerId); }
-      if (live) apply(e);
-    });
-    const end = () => { if (active && live) settle(); active = false; };
-    el.addEventListener('pointerup', end);
-    el.addEventListener('pointercancel', end);
-  }
   const timeFromTrack = (p) => setSlot(Math.floor(p * N));
-  trackDrag(wrap, timeFromTrack, { lazy: true, pad: 16 });
-  trackDrag(track, (p) => (picking ? setDay(rest + Math.round(lensDays(2 * p - 1))) : timeFromTrack(p)));
+  const valueFromTrack = (p) => (picking ? setDay(rest + Math.round(lensDays(2 * p - 1))) : timeFromTrack(p));
+  const ratioIn = (el, e, pad) => {
+    const r = el.getBoundingClientRect();
+    return clamp((e.clientX - r.left - pad) / (r.width - 2 * pad), 0, 1);
+  };
+
+  // The whole table is one bottom sheet: sideways scrubs, up and down resizes
+  // it, and once the table is full-screen the same drag scrolls the bars.
+  let sheetGesture = null, suppressRowTap = false, coastFrame = 0;
+
+  function coast(velocity) {
+    let last = performance.now();
+    const step = (now) => {
+      const dt = now - last;
+      last = now;
+      list.scrollTop += velocity * dt;
+      velocity *= Math.exp(-dt / 325);
+      coastFrame = Math.abs(velocity) > 0.02 ? requestAnimationFrame(step) : 0;
+    };
+    coastFrame = requestAnimationFrame(step);
+  }
+
+  function dragVertically(g, step) {
+    let scrolled = false;
+    if (step < 0) {
+      if (topTarget > 0) {
+        g.pos = Math.max(0, g.pos + step);
+        moveSheet(g, g.pos);
+        if (topTarget === 0) g.pos = 0;
+      } else if (g.inList) {
+        list.scrollTop -= step;
+        scrolled = true;
+      }
+      return scrolled;
+    }
+    let rest = step;
+    if (g.inList && list.scrollTop > 0) {
+      const used = Math.min(rest, list.scrollTop);
+      list.scrollTop -= used;
+      rest -= used;
+      scrolled = true;
+    }
+    if (rest > 0) {
+      g.pos = Math.min(MAP_TOP, g.pos + rest);
+      moveSheet(g, g.pos);
+    }
+    return scrolled;
+  }
+
+  sheet.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || e.target.closest('button')) return;
+    cancelAnimationFrame(coastFrame);
+    suppressRowTap = false;
+    sheetGesture = {
+      id: e.pointerId, x: e.clientX, y: e.clientY, lastY: e.clientY, lastTime: e.timeStamp,
+      axis: null, inList: !!e.target.closest('.wrap'), inTrack: !!e.target.closest('.track'),
+      pos: topTarget, snapped: topTarget < 1 || topTarget > MAP_TOP - 1, velocity: 0, scrolling: false,
+    };
+  });
+  sheet.addEventListener('pointermove', (e) => {
+    const g = sheetGesture;
+    if (!g || e.pointerId !== g.id) return;
+    if (!g.axis) {
+      const dx = e.clientX - g.x, dy = e.clientY - g.y;
+      if (Math.hypot(dx, dy) <= 6) return;
+      g.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      suppressRowTap = true;
+      sheet.setPointerCapture(e.pointerId);
+    }
+    if (g.axis === 'x') {
+      if (g.inTrack) valueFromTrack(ratioIn(track, e, 0)); else timeFromTrack(ratioIn(wrap, e, 16));
+      return;
+    }
+    const step = e.clientY - g.lastY;
+    const dt = Math.max(e.timeStamp - g.lastTime, 1);
+    g.scrolling = dragVertically(g, step);
+    g.velocity = 0.7 * (-step / dt) + 0.3 * g.velocity;
+    g.lastY = e.clientY;
+    g.lastTime = e.timeStamp;
+  });
+  sheet.addEventListener('pointerup', (e) => {
+    const g = sheetGesture;
+    if (!g || e.pointerId !== g.id) return;
+    sheetGesture = null;
+    if (g.axis === 'x') settle();
+    else if (g.axis === 'y' && g.scrolling && e.timeStamp - g.lastTime < 80) coast(g.velocity);
+    else if (!g.axis && g.inTrack) { valueFromTrack(ratioIn(track, e, 0)); settle(); }
+  });
+  sheet.addEventListener('pointercancel', () => { sheetGesture = null; });
 
   let pillGesture = null;
   pill.addEventListener('pointerdown', (e) => {
@@ -578,43 +691,103 @@
   todayButton.addEventListener('click', () => { setDay(TODAY); settle(); });
 
   list.addEventListener('click', (e) => {
-    if (wrap.dragged) { wrap.dragged = false; return; }
+    if (suppressRowTap) { suppressRowTap = false; return; }
     const row = e.target.closest('.row');
     if (row) selectBar(BARS.find((b) => b.id === row.dataset.id));
   });
 
-  let panGesture = null;
+  // Keeps the map point under (sx, sy) in place while the zoom changes.
+  function zoomAround(sx, sy, next) {
+    next = clamp(next, MIN_ZOOM, MAX_ZOOM);
+    const mx = cx + (sx - W / 2) * zoom, my = cy + (viewCentreY() - sy) * zoom;
+    zoom = zoomTarget = next;
+    cx = cxTarget = clampCx(mx - (sx - W / 2) * next);
+    cy = cyTarget = clampCy(my - (viewCentreY() - sy) * next);
+    requestFrame();
+  }
+
+  const pointers = new Map();
+  const canvasPoint = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const pinchOf = () => {
+    const [a, b] = [...pointers.values()];
+    return { distance: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  };
+  let panGesture = null, pinchGesture = null, lastTap = null;
+  const startPan = (p, moved) => { panGesture = { x: p.x, y: p.y, cx, cy, moved }; };
+
   canvas.addEventListener('pointerdown', (e) => {
-    panGesture = { x: e.clientX, y: e.clientY, cx, cy, moved: false };
     canvas.setPointerCapture(e.pointerId);
+    const p = canvasPoint(e);
+    pointers.set(e.pointerId, p);
+    if (pointers.size === 2) {
+      pinchGesture = { ...pinchOf(), zoom };
+      panGesture = null;
+    } else if (pointers.size === 1) {
+      startPan(p, false);
+    }
   });
   canvas.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    const p = canvasPoint(e);
+    pointers.set(e.pointerId, p);
+    if (pinchGesture && pointers.size >= 2) {
+      const now = pinchOf();
+      zoomAround(now.x, now.y, pinchGesture.zoom * (pinchGesture.distance / Math.max(now.distance, 1)));
+      return;
+    }
     const g = panGesture;
     if (!g) return;
-    const dx = e.clientX - g.x, dy = e.clientY - g.y;
+    const dx = p.x - g.x, dy = p.y - g.y;
     if (Math.abs(dx) + Math.abs(dy) > 5) g.moved = true;
     if (g.moved) {
-      cx = cxTarget = clampCx(g.cx - dx * METRES_PER_PX);
-      cy = cyTarget = clampCy(g.cy + dy * METRES_PER_PX);
+      cx = cxTarget = clampCx(g.cx - dx * zoom);
+      cy = cyTarget = clampCy(g.cy + dy * zoom);
       requestFrame();
     }
   });
-  canvas.addEventListener('pointerup', (e) => {
-    if (panGesture && !panGesture.moved) {
-      const r = canvas.getBoundingClientRect();
-      let best = null, bestDist = 24 * 24;
-      for (const b of BARS) {
-        const q = (px(b.x) - (e.clientX - r.left)) ** 2 + (py(b.y) - (e.clientY - r.top)) ** 2;
-        if (q < bestDist) { bestDist = q; best = b; }
-      }
-      if (best) {
-        selectBar(best);
-        const row = list.children[order.indexOf(best)];
-        if (row) list.scrollTop = row.offsetTop - 8;
-      }
+  const endPointer = (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    const p = pointers.get(e.pointerId);
+    pointers.delete(e.pointerId);
+    if (pinchGesture) {
+      if (pointers.size < 2) pinchGesture = null;
+      if (pointers.size === 1) startPan([...pointers.values()][0], true);
+      return;
     }
+    const g = panGesture;
     panGesture = null;
-  });
+    if (e.type !== 'pointerup' || !g || g.moved) return;
+    const now = performance.now();
+    if (lastTap && now - lastTap.time < 300 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 30) {
+      lastTap = null;
+      // Double tap steps closer, then back out once fully zoomed in.
+      const next = zoomTarget <= MIN_ZOOM + 0.01 ? DEFAULT_ZOOM : Math.max(MIN_ZOOM, zoomTarget / 2);
+      const mx = cx + (p.x - W / 2) * zoom, my = cy + (viewCentreY() - p.y) * zoom;
+      zoomTarget = next;
+      cxTarget = mx - (p.x - W / 2) * next;
+      cyTarget = my - (viewCentreY() - p.y) * next;
+      requestFrame();
+      return;
+    }
+    lastTap = { time: now, x: p.x, y: p.y };
+    let best = null, bestDist = 24 * 24;
+    for (const b of BARS) {
+      const q = (px(b.x) - p.x) ** 2 + (py(b.y) - p.y) ** 2;
+      if (q < bestDist) { bestDist = q; best = b; }
+    }
+    if (best) {
+      selectBar(best);
+      const row = list.children[order.indexOf(best)];
+      if (row) list.scrollTop = row.offsetTop - 8;
+    }
+  };
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const p = canvasPoint(e);
+    zoomAround(p.x, p.y, zoom * Math.exp(e.deltaY * 0.0015));
+  }, { passive: false });
 
   // --- Layout ---------------------------------------------------------------
   function layout() {
