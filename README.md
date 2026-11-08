@@ -10,20 +10,16 @@ how much of it is lit by the sun.
 
 ## Features
 
-- **Interactive dashboard** — pick a date and hour and instantly see how many
-  terraces are sunny, the sunniest spot, the average sunlight, and how many sun
-  hours are left in the day.
-- **"Open & sunny" ranking** — terraces ordered by how much *open-and-sunny*
-  time is left today: the bar must be open (real per-bar opening hours) and the
-  terrace in sun. Click a row to inspect one.
-- **Per-terrace detail** — % of the terrace lit, open/closed status + opening
-  hours, the remaining open-and-sunny time, a half-hourly **day timeline**
-  (08:00–23:00), address, and a Google Maps link.
-- **3D map** — terraces coloured on a shade→sun gradient over extruded Kallio
-  buildings, with a **sun-direction compass** showing where the sun is
-  (azimuth + elevation, or "below horizon").
-- **Dark mode**, a warm "sunshine" theme, and a **mobile-friendly** responsive
-  layout. The date picker defaults to the day you open the app.
+- **Shadow map + sun strips on one screen.** The map shows the shadows at the
+  chosen moment, and every bar's open-and-sunny day is one strip in the table.
+- **One handle.** A single pill on the table's edge: drag sideways for the time,
+  up or down to resize. Near either end the table clicks into full-screen table
+  or full-screen map.
+- **Date slider.** Tap the date and the pill moves across a season ribbon: fine
+  control near where it last rested, big jumps further away. Today is one tap.
+- **Colours follow the day.** Light and dark are relative to each date's highest
+  sun, so every season gets its full range.
+- **Bars ranked by open-and-sunny time left**, using real per-bar opening hours.
 
 ## How it works
 
@@ -31,10 +27,9 @@ how much of it is lit by the sun.
 Offline preprocessing (pixi)              Runtime (Shiny app)
 ─────────────────────────────             ───────────────────
 1. Download Helsinki 3D mesh tiles   ┐
-2. Parse CityGML → building heights  ├─►  data/  ──►  Shiny app
-3. Ray-cast sun→terrace per datetime ┘   (geojson + parquet)   • map (pydeck)
-   → data/shadows/*.parquet                                    • ranking + detail
-                                                               • sun compass (pysolar)
+2. Footprints + mesh heights         ├─►  data/  ──►  Shiny hosts one page
+3. Ray-cast sun→terrace per datetime ┘   (geojson + parquet)   • shadow map (canvas)
+   → data/shadows/*.parquet                                    • sun strips table
 ```
 
 The heavy work is **precomputed offline**: for a grid of dates and hours the
@@ -73,13 +68,14 @@ pixi run shadows --validate         # recompute data/shadows/terrace_shadows.par
 
 ```
 src/
-  app/            Shiny app — app.py (UI + server), data.py (pure data layer)
+  app/            Shiny host (app.py), data bundling (data.py), page (www/)
   core/           Shared logic — sun position, mesh loading, ray casting, terraces
   preprocessing/  Offline pipeline — download, parse CityGML, compute shadows
 data/
   terraces.geojson            44 terrace locations + opening hours + metadata
   terrace_polygons.geojson    permit terrace polygons matched to bars
-  processed/buildings.parquet building footprints + heights
+  processed/buildings.parquet CityGML building footprints + heights
+  processed/city_blocks.parquet map footprints (city WFS) + mesh-measured heights
   shadows/terrace_shadows.parquet  precomputed sun/shade table
   raw/            downloaded 3D model + mesh tiles (gitignored, multi-GB)
 tests/            pytest suites
@@ -91,6 +87,7 @@ tests/            pytest suites
 |---|---|
 | `pixi run app` | Run the Shiny app |
 | `pixi run shadows` | Recompute the sun/shade table |
+| `pixi run blocks` | Rebuild the map's building footprints |
 | `pixi run download_mesh` | Download Helsinki 3D mesh tiles (use `--insecure`) |
 | `pixi run fetch_polygons` | Fetch terrace permit polygons (Helsinki WFS) |
 | `pixi run test` | Run the test suite |
@@ -104,10 +101,10 @@ pixi run pytest tests/test_app.py   # just the app's data-layer tests
 
 ## Tech stack
 
-[Shiny for Python](https://shiny.posit.co/py/) · [pydeck](https://pydeck.gl/) ·
+[Shiny for Python](https://shiny.posit.co/py/) ·
 [geopandas](https://geopandas.org/) · [shapely](https://shapely.readthedocs.io/) ·
 [trimesh](https://trimesh.org/) · [pysolar](https://pysolar.readthedocs.io/) ·
-[matplotlib](https://matplotlib.org/) · [pixi](https://pixi.sh/) for environments.
+[pixi](https://pixi.sh/) for environments.
 
 ## Deployment
 

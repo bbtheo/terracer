@@ -10,10 +10,12 @@ deploys directly from this GitHub repo and builds the Python environment from
   pinned to versions validated on **Python 3.12** (Connect Cloud's build).
   geopandas reads the GeoJSON via `pyogrio` (GDAL bundled in its wheels), so no
   system libraries are needed.
-- **`src/app/app.py`** — the Shiny entry point (`app = App(app_ui, server)`).
+- **`src/app/app.py`** — the Shiny entry point (`app = App(app_ui, None, static_assets=WWW)`).
+- **`src/app/www/`** — the page's script and stylesheet.
 - **`data/`** — the small precomputed inputs the app loads at startup
-  (`terraces.geojson`, `terrace_polygons.geojson`, `processed/buildings.parquet`,
-  `shadows/terrace_shadows.parquet`, ~0.9 MB total). `data/raw/` (the multi-GB
+  (`terraces.geojson`, `processed/city_blocks.parquet`,
+  `shadows/terrace_shadows.parquet`, `shadows/terrace_points.parquet`, ~0.3 MB
+  total). `data/raw/` (the multi-GB
   3D mesh) is **gitignored** and only used by the offline pipeline.
 
 `pixi` and the preprocessing pipeline (`src/preprocessing/`, `src/core/`,
@@ -39,6 +41,13 @@ biweekly date grid:
 
 ```bash
 pixi run shadows          # writes data/shadows/terrace_shadows.parquet
+```
+
+The map's building footprints come from the city WFS, with heights measured
+from the 3D mesh:
+
+```bash
+pixi run blocks           # writes data/processed/city_blocks.parquet
 ```
 
 ## Local check against the deploy environment
