@@ -146,8 +146,9 @@
 
   // --- Page -----------------------------------------------------------------
   const app = document.getElementById('app');
+  // Drawn from an attribute: as real text, iOS Safari links these as a phone number.
   const HOUR_LABELS = [8, 12, 16, 20, 23]
-    .map((h) => `<span style="left:${(((h - 8) * 2 + 0.5) / N) * 100}%">${String(h).padStart(2, '0')}</span>`).join('');
+    .map((h) => `<span aria-hidden="true" data-label="${String(h).padStart(2, '0')}" style="left:${(((h - 8) * 2 + 0.5) / N) * 100}%"></span>`).join('');
   app.innerHTML = `
     <canvas class="map"></canvas>
     <div class="credit">© City of Helsinki</div>
