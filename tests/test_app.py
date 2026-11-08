@@ -148,3 +148,5 @@ def test_app_module_defines_app():
 
     assert isinstance(m.app, App)
     assert (WWW / "terracer.js").exists() and (WWW / "terracer.css").exists()
+    head = "".join(str(dep.head) for dep in m.app_ui.render()["dependencies"])
+    assert 'name="format-detection" content="telephone=no"' in head

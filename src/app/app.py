@@ -33,6 +33,8 @@ app_ui = ui.TagList(
     ui.head_content(
         ui.tags.title("Terracer"),
         ui.tags.meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover"),
+        # Otherwise iOS Safari turns the row of hour labels into a phone-number link.
+        ui.tags.meta(name="format-detection", content="telephone=no"),
         ui.tags.link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
         ui.tags.link(rel="stylesheet", href=FONT_URL),
         ui.tags.link(rel="stylesheet", href=_asset("terracer.css")),
