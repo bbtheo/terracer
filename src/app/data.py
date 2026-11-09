@@ -180,6 +180,7 @@ def build_payload() -> dict:
         dates.append(
             {
                 "doy": day.timetuple().tm_yday,
+                "utc": int(_at(day, 12 * 60).utcoffset().total_seconds() / 3600),
                 "noon": altitude,
                 "noonT": minutes,
                 "sun": [[round(v, 1) for v in sun_az_alt(_at(day, m))] for m in SLOT_MINUTES],

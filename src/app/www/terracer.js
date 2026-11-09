@@ -189,10 +189,13 @@
   let doy = TODAY, slot = NOW_SLOT, picking = false;
   let rest = doy, lensCentre = doy;
   let dateRow, weekday;
+  const middayHour = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Helsinki', hour: 'numeric', hourCycle: 'h23' });
+  const helsinkiOffset = (n) => +middayHour.format(new Date(Date.UTC(YEAR, 0, n, 10))) - 10;
   const syncDate = () => {
-    let best = 0;
-    DATES.forEach((d, k) => { if (Math.abs(d.doy - doy) < Math.abs(DATES[best].doy - doy)) best = k; });
-    dateRow = DATES[best];
+    // Slots are clock times, so a sample across a clock change would be an hour off.
+    const offset = helsinkiOffset(doy);
+    const distance = (d) => (d.utc === offset ? Math.abs(d.doy - doy) : Infinity);
+    dateRow = DATES.reduce((best, d) => (distance(d) < distance(best) ? d : best));
     weekday = (dateOf(doy).getDay() + 6) % 7;
   };
   syncDate();

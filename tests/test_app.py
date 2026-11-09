@@ -98,6 +98,14 @@ def test_payload_shape():
         assert all(len(digits) == 31 for digits in row["s"].values())
 
 
+def test_samples_record_their_clock_offset():
+    offsets = {row["doy"]: row["utc"] for row in _payload()["dates"]}
+    assert offsets[85] == 2  # 26 March, winter time
+    assert offsets[99] == 3  # 9 April, summer time
+    assert offsets[295] == 3  # 22 October, summer time
+    assert offsets[309] == 2  # 5 November, winter time
+
+
 def test_map_covers_every_bar():
     # The western bars used to fall outside the building data.
     payload = _payload()
