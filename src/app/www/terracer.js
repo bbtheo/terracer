@@ -151,25 +151,36 @@
     .map((h) => `<span aria-hidden="true" data-label="${String(h).padStart(2, '0')}" style="left:${(((h - 8) * 2 + 0.5) / N) * 100}%"></span>`).join('');
   app.innerHTML = `
     <canvas class="map"></canvas>
-    <div class="credit">© City of Helsinki</div>
+    <div class="credit">© City of Helsinki, FMI</div>
     <div class="sheet">
+      <button class="stats round" aria-label="Sunniest terraces"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3.5 14V8.5M8 14V3M12.5 14v-3.5"/></svg></button>
       <button class="pill" aria-label="Drag sideways to change the value, or up and down to resize the table. Arrow keys also work."></button>
       <div class="column"></div><div class="neck"></div>
       <div class="hrow">
         <div class="date-buttons">
           <button class="date" aria-label="Change date"></button>
           <button class="today" aria-label="Go back to today">Today</button>
+          <span class="no-forecast" hidden>no forecast yet</span>
         </div>
         <span class="count"></span>
       </div>
       <div class="track-wrap"><div class="track"></div></div>
       <div class="mini"></div>
       <div class="wrap"><div class="list"></div></div>
+    </div>
+    <div class="board" hidden>
+      <button class="board-close round" aria-label="Back to the table"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
+      <div class="board-head"><h2>Sunniest terraces</h2><div class="board-sub"></div></div>
+      <div class="range"><div class="range-line"></div><button class="range-pill" aria-label="Drag to change the time range"></button><div class="range-stops"></div></div>
+      <div class="board-axis"><span></span><span></span></div>
+      <div class="board-list"></div>
     </div>`;
   const $ = (q) => app.querySelector(q);
   const canvas = $('.map'), sheet = $('.sheet'), pill = $('.pill'), column = $('.column'), neck = $('.neck');
   const track = $('.track'), mini = $('.mini'), wrap = $('.wrap'), list = $('.list');
   const dateButton = $('.date'), todayButton = $('.today'), hrow = $('.hrow'), countLabel = $('.count');
+  const statsButton = $('.stats'), noForecastNote = $('.no-forecast');
+  const board = $('.board'), rangeBox = $('.range'), rangePill = $('.range-pill'), rangeStops = $('.range-stops'), boardList = $('.board-list');
   const ctx = canvas.getContext('2d');
   const shadowCanvas = document.createElement('canvas');
   const shadowCtx = shadowCanvas.getContext('2d');
@@ -183,6 +194,7 @@
   const MAX_SHADOW_M = 260;
   const SNAP_PX = 70;
   const MINI_H = 50;
+  const FULL_TABLE_PAD = 74; // keeps the pill clear of the round button
   const [X0, Y0, X1, Y1] = DATA.bounds;
 
   let W = 0, H = 0, MID = 0, MAP_TOP = 0;
@@ -190,15 +202,88 @@
   let rest = doy, lensCentre = doy;
   let dateRow, weekday;
   const middayHour = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Helsinki', hour: 'numeric', hourCycle: 'h23' });
-  const helsinkiOffset = (n) => +middayHour.format(new Date(Date.UTC(YEAR, 0, n, 10))) - 10;
+  const offsetOn = (d) => +middayHour.format(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 10))) - 10;
+  const dayOfYear = (d) => Math.min(365, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 0)) / 864e5));
+  // Slots are clock times, so a sample across a clock change would be an hour off.
+  const sampleFor = (date) => {
+    const offset = offsetOn(date), n = dayOfYear(date);
+    const distance = (d) => (d.utc === offset ? Math.abs(d.doy - n) : Infinity);
+    return DATES.reduce((best, d) => (distance(d) < distance(best) ? d : best));
+  };
   const syncDate = () => {
-    // Slots are clock times, so a sample across a clock change would be an hour off.
-    const offset = helsinkiOffset(doy);
-    const distance = (d) => (d.utc === offset ? Math.abs(d.doy - doy) : Infinity);
-    dateRow = DATES.reduce((best, d) => (distance(d) < distance(best) ? d : best));
+    dateRow = sampleFor(dateOf(doy));
     weekday = (dateOf(doy).getDay() + 6) % 7;
   };
   syncDate();
+
+  // --- Weather --------------------------------------------------------------
+  // A sky value is the share of a slot with sun: measured for the past, from
+  // cloud cover for the coming days, and null when neither is known.
+  const FORECAST_KEY = 'terracer-forecast';
+  const FORECAST_MAX_AGE_MS = 3600e3;
+  const FORECAST_DAYS = 12;
+  const FORECAST_URL = 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::edited::weather::scandinavia::point::simple&latlon=60.1836,24.9515&parameters=TotalCloudCover&timestep=60&endtime=';
+  const FORECAST_FILL_HOURS = 6; // later forecast steps are three-hourly
+  const HOUR_MS = 3600e3;
+
+  const decodeSky = (digits) => [...digits].map((c) => parseInt(c, 11) / 10);
+  const isoDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const TODAY_ISO = isoDate(dateOf(TODAY));
+  const clock = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Helsinki', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' });
+  const minutesNow = () => { const [h, m] = clock.format(new Date()).split(':'); return +h * 60 + +m; };
+
+  const MEASURED = new Map(Object.entries(DATA.sunshine).map(([day, digits]) => [day, decodeSky(digits)]));
+  const skyCache = new Map();
+  let forecast = new Map(), forecastTime = 0, forecastLoading = false;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(FORECAST_KEY));
+    if (saved) { forecast = new Map(saved.hours); forecastTime = saved.time; }
+  } catch { /* no saved forecast */ }
+
+  const forecastSky = (date, minutes, offset) => {
+    const instant = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, minutes) - offset * HOUR_MS;
+    const hour = Math.floor(instant / HOUR_MS) * HOUR_MS;
+    // The newest forecast starts on the next full hour, so the current hour looks ahead.
+    for (let step = -1; step <= FORECAST_FILL_HOURS; step++) {
+      const cloud = forecast.get(hour - step * HOUR_MS);
+      if (cloud !== undefined) return 1 - cloud / 100;
+    }
+    return null;
+  };
+  function skyRow(date) {
+    const key = isoDate(date);
+    if (skyCache.has(key)) return skyCache.get(key);
+    const measured = MEASURED.get(key), now = minutesNow(), offset = offsetOn(date);
+    const row = SLOTS.map((minutes, j) => {
+      if (key < TODAY_ISO) return measured ? measured[j] : null;
+      if (key === TODAY_ISO && measured && minutes + 30 <= now) return measured[j];
+      return forecastSky(date, minutes, offset);
+    });
+    skyCache.set(key, row);
+    return row;
+  }
+
+  async function refreshForecast() {
+    if (forecastLoading || Date.now() - forecastTime < FORECAST_MAX_AGE_MS) return;
+    forecastLoading = true;
+    try {
+      const end = new Date(Date.now() + FORECAST_DAYS * 864e5).toISOString().slice(0, 19) + 'Z';
+      const response = await fetch(FORECAST_URL + end);
+      if (!response.ok) return;
+      const pattern = /<BsWfs:Time>([^<]*)<\/BsWfs:Time>\s*<BsWfs:ParameterName>TotalCloudCover<\/BsWfs:ParameterName>\s*<BsWfs:ParameterValue>([^<]*)</g;
+      const hours = [...(await response.text()).matchAll(pattern)]
+        .filter((m) => m[2] !== 'NaN').map((m) => [Date.parse(m[1]), +m[2]]);
+      if (!hours.length) return;
+      forecast = new Map(hours);
+      forecastTime = Date.now();
+      try { localStorage.setItem(FORECAST_KEY, JSON.stringify({ time: forecastTime, hours })); } catch { /* storage full */ }
+      weatherChanged();
+    } catch { /* keep the saved forecast */ } finally {
+      forecastLoading = false;
+    }
+  }
 
   const hours = (b) => b.h[weekday];
   const isOpen = (b, j) => { const h = hours(b); return !!h && h[0] <= SLOTS[j] && SLOTS[j] < h[1]; };
@@ -206,7 +291,13 @@
   const sunnyRun = (b, j) => { let k = 0; while (j + k < N && isSunny(b, j + k)) k++; return k; };
   const sunLeft = (b, j) => { let k = 0; for (let q = j; q < N; q++) if (isSunny(b, q)) k++; return k; };
   const nextSun = (b, j) => { for (let q = j; q < N; q++) if (isSunny(b, q)) return q; return -1; };
-  const ranked = () => [...BARS].sort((a, b) => (isSunny(b, slot) - isSunny(a, slot)) || (sunLeft(b, slot) - sunLeft(a, slot)) || (isOpen(b, slot) - isOpen(a, slot)) || a.n.localeCompare(b.n));
+  const skyLeft = (b, j) => {
+    const sky = skyRow(dateOf(doy));
+    let total = 0;
+    for (let q = j; q < N; q++) if (isSunny(b, q)) total += sky[q] ?? 1;
+    return total;
+  };
+  const ranked = () => [...BARS].sort((a, b) => (isSunny(b, slot) - isSunny(a, slot)) || (skyLeft(b, slot) - skyLeft(a, slot)) || (sunLeft(b, slot) - sunLeft(a, slot)) || (isOpen(b, slot) - isOpen(a, slot)) || a.n.localeCompare(b.n));
 
   let order = ranked(), selected = order[0];
   let colours = paletteAt(dateRow, slot).map((c) => [...c]), P = {};
@@ -245,17 +336,20 @@
   // Full-screen map turns the sheet into a floating card.
   function shapeSheet() {
     const e = smooth(clamp((top - (MAP_TOP - 118)) / 118, 0, 1));
-    const nearTop = Math.min(top, 40) / 40;
+    const nearTop = Math.min(top, 84) / 84;
     sheet.style.top = `${top}px`;
     sheet.style.left = sheet.style.right = `${10 * e}px`;
     sheet.style.bottom = `${12 * e}px`;
-    sheet.style.paddingTop = `${30 * (1 - nearTop)}px`;
+    sheet.style.paddingTop = `${FULL_TABLE_PAD * (1 - nearTop)}px`;
+    const statsShown = clamp(1 - nearTop * 2, 0, 1);
+    statsButton.style.opacity = statsShown;
+    statsButton.style.pointerEvents = statsShown > 0.9 ? 'auto' : 'none';
     sheet.style.borderRadius = `${28 * nearTop}px ${28 * nearTop}px ${24 * e}px ${24 * e}px`;
     mini.style.height = `${MINI_H * e}px`;
     mini.style.opacity = e;
     wrap.style.opacity = 1 - e;
     wrap.style.visibility = e > 0.97 ? 'hidden' : 'visible';
-    pill.style.top = `${-18 + 30 * (1 - nearTop)}px`;
+    pill.style.top = `${-18 + FULL_TABLE_PAD * (1 - nearTop)}px`;
     column.style.bottom = `${10 * e}px`;
     placeHandle();
   }
@@ -379,6 +473,7 @@
   }
 
   function rowHtml(b) {
+    const sky = skyRow(dateOf(doy));
     const next = nextSun(b, slot);
     const note = hours(b) === null ? 'closed'
       : isSunny(b, slot) ? `until ${fmt(SLOTS[slot + sunnyRun(b, slot) - 1] + 30)}`
@@ -389,7 +484,7 @@
       if (!isSunny(b, j)) return `<i class="shade${past}"></i>`;
       const first = j === 0 || !isSunny(b, j - 1) ? ' first' : '';
       const last = j === N - 1 || !isSunny(b, j + 1) ? ' last' : '';
-      return `<i class="sun${first}${last}${past}" style="--f:${dateRow.s[b.id][j]}"></i>`;
+      return `<i class="sun${first}${last}${past}" style="--f:${sky[j] ?? 1}"></i>`;
     }).join('');
     return `<div class="row${b === selected ? ' on' : ''}" data-id="${b.id}"><div class="title"><span>${esc(b.n)}</span><em>${note}</em></div><div class="strip">${cells}</div></div>`;
   }
@@ -407,6 +502,7 @@
     hrow.classList.toggle('picking', picking);
     todayButton.style.display = picking ? '' : 'none';
     todayButton.disabled = doy === TODAY;
+    noForecastNote.hidden = picking || !forecast.size || isoDate(dateOf(doy)) <= TODAY_ISO || skyRow(dateOf(doy)).some((v) => v !== null);
     placeHandle();
   }
 
@@ -692,6 +788,8 @@
   });
 
   dateButton.addEventListener('click', () => setPicking(!picking));
+  statsButton.addEventListener('click', openBoard);
+  $('.board-close').addEventListener('click', () => { board.hidden = true; });
   todayButton.addEventListener('click', () => { setDay(TODAY); settle(); });
 
   list.addEventListener('click', (e) => {
@@ -793,6 +891,100 @@
     zoomAround(p.x, p.y, zoom * Math.exp(e.deltaY * 0.0015));
   }, { passive: false });
 
+  // --- Leaderboard ----------------------------------------------------------
+  // Hours a bar was open, out of the shade, and the sun was actually out.
+  const RANGES = ['week', 'month', 'year'];
+  let boardRange = 'month', boardTally = null, rangeDrag = null;
+
+  const daysBetween = (a, b) => Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 864e5);
+  const fmtHours = (h) => `${h >= 100 ? Math.round(h).toLocaleString('en-US') : h >= 10 ? Math.round(h) : Math.round(h * 2) / 2}\u00a0h`;
+
+  function hoursOn(bar, date, sample, sky) {
+    const h = bar.h[(date.getDay() + 6) % 7];
+    if (!h) return 0;
+    let total = 0;
+    SLOTS.forEach((minutes, j) => { if (h[0] <= minutes && minutes < h[1] && sample.s[bar.id][j] >= 0.5) total += 0.5 * sky[j]; });
+    return total;
+  }
+
+  // Tallies end with the last day that has complete measurements.
+  function tallyBoard() {
+    let end = addDays(dateOf(TODAY), -1);
+    for (let guard = 0; !MEASURED.has(isoDate(end)) && guard < 400; guard++) end = addDays(end, -1);
+    if (!MEASURED.has(isoDate(end))) return null;
+    const jan1 = new Date(end.getFullYear(), 0, 1);
+    const spans = { week: [addDays(end, -6), 7, 1], month: [addDays(end, -29), 30, 1], year: [jan1, daysBetween(jan1, end) + 1, 7] };
+    const scores = new Map(BARS.map((b) => [b.id, {}]));
+    for (const key of RANGES) {
+      const [first, days, bin] = spans[key];
+      for (const b of BARS) scores.get(b.id)[key] = { total: 0, cells: new Array(Math.ceil(days / bin)).fill(0) };
+      for (let i = 0; i < days; i++) {
+        const date = addDays(first, i), sky = MEASURED.get(isoDate(date));
+        if (!sky) continue;
+        const sample = sampleFor(date);
+        for (const b of BARS) {
+          const hours = hoursOn(b, date, sample, sky), score = scores.get(b.id)[key];
+          score.total += hours;
+          score.cells[Math.floor(i / bin)] += hours;
+        }
+      }
+    }
+    return { end, spans, scores };
+  }
+
+  const rangeLabel = (key, tally) => (key === 'week' ? '7 days' : key === 'month' ? '30 days' : String(tally.end.getFullYear()));
+  const rangeLeft = (i) => 46 + (i * (rangeBox.clientWidth - 92)) / 2;
+
+  function renderBoard() {
+    boardTally = boardTally || tallyBoard();
+    const tally = boardTally;
+    if (!tally) { $('.board-sub').textContent = 'No sunshine data yet'; boardList.innerHTML = ''; return; }
+    const first = tally.spans[boardRange][0];
+    $('.board-sub').textContent = `Hours open, unshaded and sunny, ${shortDate(first)} to ${shortDate(tally.end)}`;
+    rangePill.textContent = rangeLabel(boardRange, tally);
+    rangePill.style.left = `${rangeLeft(RANGES.indexOf(boardRange))}px`;
+    rangeStops.innerHTML = RANGES.map((key) => `<button data-range="${key}" class="${key === boardRange ? 'on' : ''}">${rangeLabel(key, tally)}</button>`).join('');
+    const [axisStart, axisEnd] = app.querySelectorAll('.board-axis span');
+    axisStart.textContent = shortDate(first);
+    axisEnd.textContent = shortDate(tally.end);
+    const rows = BARS.map((b) => ({ name: b.n, ...tally.scores.get(b.id)[boardRange] })).filter((r) => r.total > 0)
+      .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+    const peak = Math.max(1e-6, ...rows.flatMap((r) => r.cells));
+    const empty = BARS.length - rows.length;
+    boardList.innerHTML = rows.map((r, i) => `<div class="board-row"><span class="rank${i < 3 ? ' lead' : ''}">${i + 1}</span><div><div class="title"><span>${esc(r.name)}</span><em>${fmtHours(r.total)}</em></div><div class="cells">${r.cells.map((c) => (c > 0 ? `<i style="opacity:${(0.3 + (0.7 * c) / peak).toFixed(2)}"></i>` : '<i class="none"></i>')).join('')}</div></div></div>`).join('')
+      + `<div class="board-foot">${empty ? `${empty} bars had no open sun. ` : ''}Sunshine measured at Kumpula by FMI.</div>`;
+  }
+  function openBoard() { board.hidden = false; renderBoard(); }
+  function setRange(key) { boardRange = key; boardList.scrollTop = 0; renderBoard(); }
+
+  rangeStops.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setRange(b.dataset.range); });
+  rangePill.addEventListener('pointerdown', (e) => {
+    rangeDrag = { x: e.clientX, left: parseFloat(rangePill.style.left) };
+    rangePill.classList.add('dragging');
+    rangePill.setPointerCapture(e.pointerId);
+  });
+  rangePill.addEventListener('pointermove', (e) => {
+    if (rangeDrag) rangePill.style.left = `${clamp(rangeDrag.left + e.clientX - rangeDrag.x, rangeLeft(0), rangeLeft(2))}px`;
+  });
+  const endRangeDrag = () => {
+    if (!rangeDrag) return;
+    rangeDrag = null;
+    rangePill.classList.remove('dragging');
+    const at = parseFloat(rangePill.style.left);
+    setRange(RANGES.reduce((best, key, i) => (Math.abs(rangeLeft(i) - at) < Math.abs(rangeLeft(RANGES.indexOf(best)) - at) ? key : best), boardRange));
+  };
+  rangePill.addEventListener('pointerup', endRangeDrag);
+  rangePill.addEventListener('pointercancel', endRangeDrag);
+
+  function weatherChanged() {
+    skyCache.clear();
+    boardTally = null;
+    if (!sheetGesture && !pillGesture) order = ranked();
+    renderList();
+    renderLabels();
+    if (!board.hidden) renderBoard();
+  }
+
   // --- Layout ---------------------------------------------------------------
   function layout() {
     const wasFullMap = H > 0 && Math.abs(topTarget - MAP_TOP) < 1;
@@ -820,4 +1012,15 @@
   layout();
   new ResizeObserver(() => { if (app.clientWidth !== W || app.clientHeight !== H) layout(); }).observe(app);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawMap);
+
+  (function listenForSunshine() {
+    if (!window.Shiny || !window.Shiny.addCustomMessageHandler) { setTimeout(listenForSunshine, 50); return; }
+    window.Shiny.addCustomMessageHandler('terracer-sunshine', (days) => {
+      for (const [day, digits] of Object.entries(days)) MEASURED.set(day, decodeSky(digits));
+      weatherChanged();
+    });
+  })();
+  refreshForecast();
+  setInterval(refreshForecast, 10 * 60e3);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshForecast(); });
 })();

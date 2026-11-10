@@ -98,6 +98,11 @@ def test_payload_shape():
         assert all(len(digits) == 31 for digits in row["s"].values())
 
 
+def test_payload_includes_measured_sunshine():
+    sunshine = _payload()["sunshine"]
+    assert sunshine["2026-01-01"] and all(len(v) == 31 for v in sunshine.values())
+
+
 def test_samples_record_their_clock_offset():
     offsets = {row["doy"]: row["utc"] for row in _payload()["dates"]}
     assert offsets[85] == 2  # 26 March, winter time

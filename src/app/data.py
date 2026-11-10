@@ -10,6 +10,7 @@ The app is one client-side page: everything it needs is bundled once by
 from __future__ import annotations
 
 import json
+import sys
 import warnings
 from datetime import date, datetime
 from functools import lru_cache
@@ -19,6 +20,10 @@ from zoneinfo import ZoneInfo
 import geopandas as gpd
 import pandas as pd
 from pysolar.solar import get_altitude, get_azimuth
+
+# Import the sibling module whether loaded as a script, a module or by file path.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sunshine  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 HELSINKI_TZ = ZoneInfo("Europe/Helsinki")
@@ -215,6 +220,7 @@ def build_payload() -> dict:
         "blocks": blocks,
         "roads": roads,
         "water": water,
+        "sunshine": sunshine.read_history(),
     }
 
 
