@@ -50,6 +50,7 @@ from the 3D mesh:
 ```bash
 pixi run blocks           # writes data/processed/city_blocks.parquet
 pixi run basemap          # writes data/processed/map_roads.parquet + map_water.parquet
+pixi run sunshine         # adds finished days to data/weather/sunshine.csv
 ```
 
 ## Local check against the deploy environment

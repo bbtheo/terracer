@@ -27,6 +27,7 @@ pixi run download_mesh # Download mesh tiles covering terraces
 pixi run fetch_polygons # Fetch terrace permit polygons (Helsinki WFS), match to bars
 pixi run blocks       # Build map footprints (city WFS) with mesh-measured heights
 pixi run basemap      # Fetch map streets and water (city WFS)
+pixi run sunshine     # Add finished days of FMI measured sunshine (also runs nightly in GitHub Actions)
 pixi run test         # Run tests
 pixi shell            # Enter the environment shell
 ```
@@ -39,6 +40,7 @@ pixi shell            # Enter the environment shell
 - `data/raw/` - downloaded CityGML + mesh tiles (gitignored)
 - `data/processed/` - CityGML buildings parquet, `city_blocks.parquet` (map footprints with mesh heights), `map_roads.parquet` and `map_water.parquet` (map base)
 - `data/shadows/` - precomputed sun/shade tables
+- `data/weather/sunshine.csv` - measured sunshine per half-hour slot, per day (FMI Kumpula)
 - `data/terraces.geojson` - terrace locations + metadata
 - `data/terrace_polygons.geojson` - terrace permit polygons matched to bars (city WFS)
 - `tests/` - test suites
